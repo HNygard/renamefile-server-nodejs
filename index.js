@@ -17,6 +17,70 @@ http.createServer(function(request, response) {
     '.js':   "text/javascript"
   };
 
+  if(uri === '/') {
+    var mainpage_html = '<!DOCTYPE html>' +
+      '<html>' +
+      '    <head>' +
+      '    </head>' +
+      '    <frameset framespacing="0" cols="150,*" frameborder="0" noresize>' +
+      '        <frame name="top" src="/filelist" target="top">' +
+      '        <frame name="main" src="/fileview" target="main">' +
+      '    </frameset>' +
+      '</html>';
+    response.writeHead(200, {"Content-Type": "text/html"});
+    response.write(mainpage_html + "\n");
+    response.end();
+    return
+  }
+
+  if(uri === '/fileview') {
+    var html = '<!DOCTYPE html>' +
+      '<html>' +
+      '    <head>' +
+      '    </head>' +
+      '    <frameset framespacing="0" rows="*,150" frameborder="0" noresize>' +
+      '        <frame name="top" src="/file" target="top">' +
+      '        <frame name="main" src="/filerename" target="main">' +
+      '    </frameset>' +
+      '</html>';
+    response.writeHead(200, {"Content-Type": "text/html"});
+    response.write(html + "\n");
+    response.end();
+    return
+  }
+
+  if(uri === '/filerename') {
+    var html = '<!DOCTYPE html>' +
+      '<html>' +
+      '    <head>' +
+      '    </head>';
+    html += '<body style="background-color: lightgray;">';
+    html += '<input style="width: 100%"><br>';
+    html += 'Previous name: TODO<br>';
+    html += 'New name: TODO<br>';
+    html += '</body>';
+      '</html>';
+    response.writeHead(200, {"Content-Type": "text/html"});
+    response.write(html + "\n");
+    response.end();
+    return
+  }
+
+  if(uri === '/filelist') {
+    var html = '<!DOCTYPE html>' +
+      '<html>' +
+      '    <head>' +
+      '    </head>';
+    html += '<body style="background-color: lightgray;">';
+    html += '<b>File list:</b><br>';
+    html += 'TODO';
+    html += '</body>';
+      '</html>';
+    response.writeHead(200, {"Content-Type": "text/html"});
+    response.write(html + "\n");
+    response.end();
+    return
+  }
   fs.exists(filename, function(exists) {
     if(!exists) {
       console.log('-- 404 Not Found');
