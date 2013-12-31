@@ -8,6 +8,8 @@ http.createServer(function(request, response) {
  
   var uri = url.parse(request.url).pathname
     , filename = path.join(process.cwd(), uri);
+
+  console.log(request.method + ' ' + uri);
   
   var contentTypesByExtension = {
     '.html': "text/html",
@@ -17,6 +19,7 @@ http.createServer(function(request, response) {
 
   fs.exists(filename, function(exists) {
     if(!exists) {
+      console.log('-- 404 Not Found');
       response.writeHead(404, {"Content-Type": "text/plain"});
       response.write("404 Not Found\n");
       response.end();
@@ -27,12 +30,15 @@ http.createServer(function(request, response) {
  
     fs.readFile(filename, "binary", function(err, file) {
       if(err) {        
+        console.log('-- 500');
+        console.log('-- Message: ' + err);
         response.writeHead(500, {"Content-Type": "text/plain"});
         response.write(err + "\n");
         response.end();
         return;
       }
  
+      console.log('-- Sending file: ' + filename);
       var headers = {};
       var contentType = contentTypesByExtension[path.extname(filename)];
       if (contentType) headers["Content-Type"] = contentType;
