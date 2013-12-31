@@ -1,0 +1,8 @@
+Make the app accessible from command line:
+    ln -s `pwd`/renamefile-server-nodejs.sh ~/bin/renamefile-server
+
+TODO:
+- Actual rename of files
+- Refresh / new file after renaming
+- Bash script with path as argument or something
+- Open browser when app starts

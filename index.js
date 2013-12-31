@@ -5,11 +5,13 @@ var http = require("http"),
     port = process.argv[2] || 8888;
  
 var CURRENT_DIRECTORY = process.cwd();
+console.log('Starting server in:');
+console.log('    ' + CURRENT_DIRECTORY);
 
 http.createServer(function(request, response) {
  
-  var uri = url.parse(request.url).pathname
-    , filename = path.join(CURRENT_DIRECTORY, uri);
+  var uri = url.parse(request.url).pathname;
+  var filename = path.join(CURRENT_DIRECTORY, decodeURIComponent(uri));
 
   console.log(request.method + ' ' + request.url);
   
@@ -125,7 +127,7 @@ http.createServer(function(request, response) {
 
   fs.exists(filename, function(exists) {
     if(!exists) {
-      console.log('-- 404 Not Found');
+      console.log('-- 404 Not Found: ' + filename);
       response.writeHead(404, {"Content-Type": "text/plain"});
       response.write("404 Not Found\n");
       response.end();
