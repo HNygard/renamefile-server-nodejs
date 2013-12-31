@@ -4,12 +4,14 @@ var http = require("http"),
     fs = require("fs")
     port = process.argv[2] || 8888;
  
+var CURRENT_DIRECTORY = process.cwd();
+
 http.createServer(function(request, response) {
  
   var uri = url.parse(request.url).pathname
-    , filename = path.join(process.cwd(), uri);
+    , filename = path.join(CURRENT_DIRECTORY, uri);
 
-  console.log(request.method + ' ' + uri);
+  console.log(request.method + ' ' + request.url);
   
   var contentTypesByExtension = {
     '.html': "text/html",
@@ -34,13 +36,16 @@ http.createServer(function(request, response) {
   }
 
   if(uri === '/fileview') {
+    var url_parts = url.parse(request.url, true);
+    var query = url_parts.query;
+    console.log('-- FILE: ' + query.file);
     var html = '<!DOCTYPE html>' +
       '<html>' +
       '    <head>' +
       '    </head>' +
       '    <frameset framespacing="0" rows="*,150" frameborder="0" noresize>' +
-      '        <frame name="top" src="/file" target="top">' +
-      '        <frame name="main" src="/filerename" target="main">' +
+      '        <frame name="top" src="' + query.file + '">' +
+      '        <frame name="main" src="/filerename?file=' + query.file + '">' +
       '    </frameset>' +
       '</html>';
     response.writeHead(200, {"Content-Type": "text/html"});
@@ -50,15 +55,27 @@ http.createServer(function(request, response) {
   }
 
   if(uri === '/filerename') {
+    var url_parts = url.parse(request.url, true);
+    var query = url_parts.query;
+    console.log('-- FILE: ' + query.file);
     var html = '<!DOCTYPE html>' +
       '<html>' +
       '    <head>' +
       '    </head>';
     html += '<body style="background-color: lightgray;">';
-    html += '<input style="width: 100%"><br>';
-    html += 'Previous name: TODO<br>';
-    html += 'New name: TODO<br>';
+    html += '<input id="filename_new" style="width: 100%"><br>';
+    html += 'Previous name: '+query.file+'<br>';
+    html += 'New name: <span id="filename_new_display"></span>' + path.extname(query.file) + '<br>';
     html += '</body>';
+    html += '<script>'+
+'var elm = document.getElementById("filename_new"); '+
+'var elm2 = document.getElementById("filename_new_display"); ' +
+'var updateFunction = function() { console.log("New value: " + elm.value); elm2.innerHTML=elm.value; }; ' +
+'elm.onclick = updateFunction; ' +
+'elm.onkeyup = updateFunction; ' +
+'elm.onchange = updateFunction; ' +
+'updateFunction(); ' +
+'</script>';
       '</html>';
     response.writeHead(200, {"Content-Type": "text/html"});
     response.write(html + "\n");
@@ -67,13 +84,37 @@ http.createServer(function(request, response) {
   }
 
   if(uri === '/filelist') {
+    function getFiles(dir, getFromSubdirectories) {
+        var files = fs.readdirSync(dir);
+        var filesAndDirectories = [];
+        for(var i in files) {
+            if (!files.hasOwnProperty(i)) continue;
+            var name = dir+'/'+files[i];
+            if (fs.statSync(name).isDirectory()) {
+                filesAndDirectories.push(name);
+                if(getFromSubdirectories) {
+                   // TODO: getFiles(name);
+                }
+            }
+            else {
+                filesAndDirectories.push(name);
+            }
+        }
+        return filesAndDirectories;
+    }
+
     var html = '<!DOCTYPE html>' +
       '<html>' +
       '    <head>' +
       '    </head>';
     html += '<body style="background-color: lightgray;">';
+    html += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
     html += '<b>File list:</b><br>';
-    html += 'TODO';
+    var filesAndDirectories = getFiles(CURRENT_DIRECTORY);
+    for(var i = 0; i < filesAndDirectories.length; i++) {
+        var filename = filesAndDirectories[i].substring(CURRENT_DIRECTORY.length+1);
+        html += '- <a href="/fileview?file='+filename+'" target="main">'+filename+'</a><br />';
+    }
     html += '</body>';
       '</html>';
     response.writeHead(200, {"Content-Type": "text/html"});
@@ -81,6 +122,7 @@ http.createServer(function(request, response) {
     response.end();
     return
   }
+
   fs.exists(filename, function(exists) {
     if(!exists) {
       console.log('-- 404 Not Found');
