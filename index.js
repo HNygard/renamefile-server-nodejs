@@ -1,8 +1,10 @@
 var http = require("http"),
     url = require("url"),
     path = require("path"),
-    fs = require("fs")
-    port = process.argv[2] || 8888;
+    fs = require("fs"),
+    querystring = require('querystring');
+
+var port = process.argv[2] || 8888;
  
 var CURRENT_DIRECTORY = process.cwd();
 console.log('Starting server in:');
@@ -78,31 +80,72 @@ http.createServer(function(request, response) {
     var url_parts = url.parse(request.url, true);
     var query = url_parts.query;
     console.log('-- FILE: ' + query.file);
-
     fileExistsOr404(query.file, function() {
-      var html = '<!DOCTYPE html>' +
-        '<html>' +
-        '    <head>' +
-        '    </head>';
-      html += '<body style="background-color: lightgray;">';
-      html += '<input id="filename_new" style="width: 100%"><br>';
-      html += 'Previous name: '+query.file+'<br>';
-      html += 'New name: <span id="filename_new_display"></span>' + path.extname(query.file) + '<br>';
-      html += '</body>';
-      html += '<script>'+
-        'var elm = document.getElementById("filename_new"); '+
-        'var elm2 = document.getElementById("filename_new_display"); ' +
-        'var updateFunction = function() { console.log("New value: " + elm.value); elm2.innerHTML=elm.value; }; ' +
-        'elm.onclick = updateFunction; ' +
-        'elm.onkeyup = updateFunction; ' +
-        'elm.onchange = updateFunction; ' +
-        'updateFunction(); ' +
-        '</script>';
-        '</html>';
-      response.writeHead(200, {"Content-Type": "text/html"});
-      response.write(html + "\n");
-      response.end();
-      return
+
+      if(request.method === 'POST') {
+        // Based on http://stackoverflow.com/a/12022746/298195
+        var queryData = "";
+        request.on('data', function(data) {
+            queryData += data;
+            if(queryData.length > 1e6) {
+                queryData = "";
+                response.writeHead(413, {'Content-Type': 'text/plain'}).end();
+                request.connection.destroy();
+            }
+        });
+
+        request.on('end', function() {
+          response.post = querystring.parse(queryData);
+          console.log(response.post);
+          var filename_new = response.post.filename_new + path.extname(query.file);
+          filename_new = filename_new.replace(/\\/g, ''); // Remove slashes
+          filename_new_with_path = path.join(CURRENT_DIRECTORY, filename_new);
+          filename_old_with_path = path.join(CURRENT_DIRECTORY, query.file);
+          console.log('-- NEW FILENAME: ' + filename_new);
+          console.log('-- -- New - full path: ' + filename_new_with_path);
+          console.log('-- -- Old - full path: ' + filename_old_with_path);
+          fs.renameSync(filename_old_with_path, filename_new_with_path);
+          var html = '<!DOCTYPE html>' +
+            '<html>' +
+            '    <body>' +
+            '      Ok' +
+            '    </body>' +
+            '</html>';
+          response.writeHead(200, {"Content-Type": "text/html"});
+          response.write(html + "\n");
+          response.end();
+          return
+        });
+      }
+      else {
+
+        var html = '<!DOCTYPE html>' +
+          '<html>' +
+          '    <head>' +
+          '    </head>';
+        html += '<body style="background-color: lightgray;">';
+        html += '<form method="POST">';
+        html += '<input name="filename_new" id="filename_new" style="width: 90%">';
+        html += '<input id="filename_submit" style="width: 10%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
+        html += '</form>';
+        html += 'Previous name: '+query.file+'<br>';
+        html += 'New name: <span id="filename_new_display"></span>' + path.extname(query.file) + '<br>';
+        html += '</body>';
+        html += '<script>'+
+          'var elm = document.getElementById("filename_new"); '+
+          'var elm2 = document.getElementById("filename_new_display"); ' +
+          'var updateFunction = function() { console.log("New value: " + elm.value); elm2.innerHTML=elm.value; }; ' +
+          'elm.onclick = updateFunction; ' +
+          'elm.onkeyup = updateFunction; ' +
+          'elm.onchange = updateFunction; ' +
+          'updateFunction(); ' +
+          '</script>';
+          '</html>';
+        response.writeHead(200, {"Content-Type": "text/html"});
+        response.write(html + "\n");
+        response.end();
+        return
+      }
     });
   }
 

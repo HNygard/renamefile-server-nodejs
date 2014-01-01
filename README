@@ -2,7 +2,6 @@ Make the app accessible from command line:
     ln -s `pwd`/renamefile-server-nodejs.sh ~/bin/renamefile-server
 
 TODO:
-- Actual rename of files
 - Refresh / new file after renaming
 - Open browser when app starts
 - Image viewer - Zoom and pan (maybe https://github.com/benlumley/jQuery-PanZoom)
