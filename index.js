@@ -179,7 +179,8 @@ http.createServer(function(request, response) {
     var filesAndDirectories = getFiles(CURRENT_DIRECTORY);
     for(var i = 0; i < filesAndDirectories.length; i++) {
         var filename = filesAndDirectories[i].substring(CURRENT_DIRECTORY.length+1);
-        html += '- <a href="/fileview?file='+filename+'" target="main">'+filename+'</a><br />';
+        html += '<span style="white-space:nowrap;">'+
+          '- <a href="/fileview?file='+filename+'" target="main">'+filename+'</a></span><br />';
     }
     html += '</body>';
       '</html>';
