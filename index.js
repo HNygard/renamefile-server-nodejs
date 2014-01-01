@@ -21,6 +21,21 @@ http.createServer(function(request, response) {
     '.js':   "text/javascript"
   };
 
+  var fileExistsOr404 = function(filenameThatShouldExist, successFunction) {
+
+    fs.exists("" + filenameThatShouldExist, function(exists) {
+      if(!exists) {
+        console.log('-- 404 Not Found: ' + filenameThatShouldExist);
+        response.writeHead(404, {"Content-Type": "text/plain"});
+        response.write("404 Not Found\n");
+        response.end();
+        return;
+      }
+
+      successFunction();
+    });
+  }
+
   if(uri === '/') {
     var mainpage_html = '<!DOCTYPE html>' +
       '<html>' +
@@ -37,55 +52,61 @@ http.createServer(function(request, response) {
     return
   }
 
-  if(uri === '/fileview') {
+  else if(uri === '/fileview') {
     var url_parts = url.parse(request.url, true);
     var query = url_parts.query;
     console.log('-- FILE: ' + query.file);
-    var html = '<!DOCTYPE html>' +
-      '<html>' +
-      '    <head>' +
-      '    </head>' +
-      '    <frameset framespacing="0" rows="*,150" frameborder="0" noresize>' +
-      '        <frame name="top" src="' + query.file + '">' +
-      '        <frame name="main" src="/filerename?file=' + query.file + '">' +
-      '    </frameset>' +
-      '</html>';
-    response.writeHead(200, {"Content-Type": "text/html"});
-    response.write(html + "\n");
-    response.end();
-    return
+
+    fileExistsOr404(query.file, function() {
+      var html = '<!DOCTYPE html>' +
+        '<html>' +
+        '    <head>' +
+        '    </head>' +
+        '    <frameset framespacing="0" rows="*,150" frameborder="0" noresize>' +
+        '        <frame name="top" src="' + query.file + '">' +
+        '        <frame name="main" src="/filerename?file=' + query.file + '">' +
+        '    </frameset>' +
+        '</html>';
+      response.writeHead(200, {"Content-Type": "text/html"});
+      response.write(html + "\n");
+      response.end();
+      return
+    });
   }
 
-  if(uri === '/filerename') {
+  else if(uri === '/filerename') {
     var url_parts = url.parse(request.url, true);
     var query = url_parts.query;
     console.log('-- FILE: ' + query.file);
-    var html = '<!DOCTYPE html>' +
-      '<html>' +
-      '    <head>' +
-      '    </head>';
-    html += '<body style="background-color: lightgray;">';
-    html += '<input id="filename_new" style="width: 100%"><br>';
-    html += 'Previous name: '+query.file+'<br>';
-    html += 'New name: <span id="filename_new_display"></span>' + path.extname(query.file) + '<br>';
-    html += '</body>';
-    html += '<script>'+
-'var elm = document.getElementById("filename_new"); '+
-'var elm2 = document.getElementById("filename_new_display"); ' +
-'var updateFunction = function() { console.log("New value: " + elm.value); elm2.innerHTML=elm.value; }; ' +
-'elm.onclick = updateFunction; ' +
-'elm.onkeyup = updateFunction; ' +
-'elm.onchange = updateFunction; ' +
-'updateFunction(); ' +
-'</script>';
-      '</html>';
-    response.writeHead(200, {"Content-Type": "text/html"});
-    response.write(html + "\n");
-    response.end();
-    return
+
+    fileExistsOr404(query.file, function() {
+      var html = '<!DOCTYPE html>' +
+        '<html>' +
+        '    <head>' +
+        '    </head>';
+      html += '<body style="background-color: lightgray;">';
+      html += '<input id="filename_new" style="width: 100%"><br>';
+      html += 'Previous name: '+query.file+'<br>';
+      html += 'New name: <span id="filename_new_display"></span>' + path.extname(query.file) + '<br>';
+      html += '</body>';
+      html += '<script>'+
+        'var elm = document.getElementById("filename_new"); '+
+        'var elm2 = document.getElementById("filename_new_display"); ' +
+        'var updateFunction = function() { console.log("New value: " + elm.value); elm2.innerHTML=elm.value; }; ' +
+        'elm.onclick = updateFunction; ' +
+        'elm.onkeyup = updateFunction; ' +
+        'elm.onchange = updateFunction; ' +
+        'updateFunction(); ' +
+        '</script>';
+        '</html>';
+      response.writeHead(200, {"Content-Type": "text/html"});
+      response.write(html + "\n");
+      response.end();
+      return
+    });
   }
 
-  if(uri === '/filelist') {
+  else if(uri === '/filelist') {
     function getFiles(dir, getFromSubdirectories) {
         var files = fs.readdirSync(dir);
         var filesAndDirectories = [];
@@ -125,36 +146,31 @@ http.createServer(function(request, response) {
     return
   }
 
-  fs.exists(filename, function(exists) {
-    if(!exists) {
-      console.log('-- 404 Not Found: ' + filename);
-      response.writeHead(404, {"Content-Type": "text/plain"});
-      response.write("404 Not Found\n");
-      response.end();
-      return;
-    }
- 
+  else {
     if (fs.statSync(filename).isDirectory()) filename += '/index.html';
+
+    fileExistsOr404(filename, function() {
+
+      fs.readFile(filename, "binary", function(err, file) {
+        if(err) {        
+          console.log('-- 500');
+          console.log('-- Message: ' + err);
+          response.writeHead(500, {"Content-Type": "text/plain"});
+          response.write(err + "\n");
+          response.end();
+          return;
+        }
  
-    fs.readFile(filename, "binary", function(err, file) {
-      if(err) {        
-        console.log('-- 500');
-        console.log('-- Message: ' + err);
-        response.writeHead(500, {"Content-Type": "text/plain"});
-        response.write(err + "\n");
+        console.log('-- Sending file: ' + filename);
+        var headers = {};
+        var contentType = contentTypesByExtension[path.extname(filename)];
+        if (contentType) headers["Content-Type"] = contentType;
+        response.writeHead(200, headers);
+        response.write(file, "binary");
         response.end();
-        return;
-      }
- 
-      console.log('-- Sending file: ' + filename);
-      var headers = {};
-      var contentType = contentTypesByExtension[path.extname(filename)];
-      if (contentType) headers["Content-Type"] = contentType;
-      response.writeHead(200, headers);
-      response.write(file, "binary");
-      response.end();
+      });
     });
-  });
+  }
 }).listen(parseInt(port, 10));
  
 console.log("Static file server running at\n  => http://localhost:" + port + "/\nCTRL + C to shutdown");
