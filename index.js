@@ -2,9 +2,11 @@ var http = require("http"),
     url = require("url"),
     path = require("path"),
     fs = require("fs"),
-    querystring = require('querystring');
+    querystring = require('querystring'),
+    open = require('open');
 
 var port = process.argv[2] || 8888;
+var serverUrl = 'http://localhost:' + port;
  
 var CURRENT_DIRECTORY = process.cwd();
 console.log('Starting server in:');
@@ -217,4 +219,5 @@ http.createServer(function(request, response) {
   }
 }).listen(parseInt(port, 10));
  
-console.log("Static file server running at\n  => http://localhost:" + port + "/\nCTRL + C to shutdown");
+console.log("Web server running at\n  => " + serverUrl + "/\nCTRL + C to shutdown");
+open(serverUrl);

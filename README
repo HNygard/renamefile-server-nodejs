@@ -9,6 +9,5 @@ Go into any directory in your terminal and start the app:
 
 TODO:
 - Refresh / new file after renaming
-- Open browser when app starts
 - Image viewer - Zoom and pan (maybe https://github.com/benlumley/jQuery-PanZoom)
 - Images can be moved into folders when renaming (categories)
