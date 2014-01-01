@@ -1,5 +1,11 @@
+Install node packages:
+    npm install
+
 Make the app accessible from command line:
     ln -s `pwd`/renamefile-server-nodejs.sh ~/bin/renamefile-server
+
+Go into any directory in your terminal and start the app:
+    renamefile-server
 
 TODO:
 - Refresh / new file after renaming
