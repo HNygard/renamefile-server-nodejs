@@ -59,6 +59,26 @@ http.createServer(function(request, response) {
       return filesAndDirectories;
   }
 
+  function handlePost(endFunction) {
+
+        // Based on http://stackoverflow.com/a/12022746/298195
+        var queryData = "";
+        request.on('data', function(data) {
+            queryData += data;
+            if(queryData.length > 1e6) {
+                queryData = "";
+                response.writeHead(413, {'Content-Type': 'text/plain'}).end();
+                request.connection.destroy();
+            }
+        });
+
+        request.on('end', function() {
+          response.post = querystring.parse(queryData);
+          console.log(response.post);
+          return endFunction();
+        });
+  }
+
   if(uri === '/') {
     var mainpage_html = '<!DOCTYPE html>' +
       '<html>' +
@@ -140,20 +160,7 @@ http.createServer(function(request, response) {
     fileExistsOr404(query.file, function() {
 
       if(request.method === 'POST') {
-        // Based on http://stackoverflow.com/a/12022746/298195
-        var queryData = "";
-        request.on('data', function(data) {
-            queryData += data;
-            if(queryData.length > 1e6) {
-                queryData = "";
-                response.writeHead(413, {'Content-Type': 'text/plain'}).end();
-                request.connection.destroy();
-            }
-        });
-
-        request.on('end', function() {
-          response.post = querystring.parse(queryData);
-          console.log(response.post);
+        handlePost(function() {
           var filename_new = response.post.filename_new + path.extname(query.file);
           filename_new = filename_new.replace(/\\/g, ''); // Remove slashes
           filename_new_with_path = path.join(CURRENT_DIRECTORY, filename_new);
