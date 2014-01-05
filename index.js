@@ -125,7 +125,7 @@ http.createServer(function(request, response) {
       '       </style>' + 
       '    </head>';
     html += '<body style="background-color: lightgray;">';
-    html += '<a data-link="/filecategoriser?" href="/filecategoriser" style="float: right;" class="renamefileslink" target="categorieser">Renames these files</a>';
+    html += '<a data-link="/filecategoriser?" href="/filecategoriser" style="position: fixed; top: 10px; right: 10px;" class="renamefileslink" target="categorieser">Renames these files</a>';
     html += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
     html += '<b>File list:</b><br>';
     var filesAndDirectories = getFileListForDirectory(CURRENT_DIRECTORY);
