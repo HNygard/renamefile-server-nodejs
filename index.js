@@ -16,6 +16,12 @@ http.createServer(function(request, response) {
  
   var uri = url.parse(request.url).pathname;
   var filename = path.join(CURRENT_DIRECTORY, decodeURIComponent(uri));
+  if(uri === '/jquery-1.4.2.min.js') {
+    // Hack to find the directory of our scripts.
+    // TODO: use a function instead
+    var lib_directory = process.mainModule.filename.substring(0, process.mainModule.filename.length-'index.js'.length);
+    filename = path.join(lib_directory, uri);
+  }
 
   console.log(request.method + ' ' + request.url);
   
@@ -86,7 +92,23 @@ http.createServer(function(request, response) {
       '    </head>' +
       '    <frameset framespacing="0" cols="150,*" frameborder="0" noresize>' +
       '        <frame name="top" src="/filelist" target="top">' +
-      '        <frame name="main" src="/fileoverview" target="main">' +
+      '        <frame name="main" src="/fileoverview_with_rename" target="main">' +
+      '    </frameset>' +
+      '</html>';
+    response.writeHead(200, {"Content-Type": "text/html"});
+    response.write(mainpage_html + "\n");
+    response.end();
+    return
+  }
+
+  else if(uri === '/fileoverview_with_rename') {
+    var mainpage_html = '<!DOCTYPE html>' +
+      '<html>' +
+      '    <head>' +
+      '    </head>' +
+      '    <frameset framespacing="0" rows="50%,50%" frameborder="0" noresize>' +
+      '        <frame name="overview" src="/fileoverview" target="categorieser">' +
+      '        <frame name="categorieser" src="/filecategoriser">' +
       '    </frameset>' +
       '</html>';
     response.writeHead(200, {"Content-Type": "text/html"});
@@ -96,39 +118,124 @@ http.createServer(function(request, response) {
   }
 
   else if(uri === '/fileoverview') {
-    var url_parts = url.parse(request.url, true);
-    var query = url_parts.query;
-    console.log('-- FILE: ' + query.file);
-
-
     var html = '<!DOCTYPE html>' +
       '<html>' +
       '    <head>' +
+      '       <style>.selectedFile { border: 3px solid green; }' + 
+      '       </style>' + 
       '    </head>';
     html += '<body style="background-color: lightgray;">';
+    html += '<a data-link="/filecategoriser?" href="/filecategoriser" style="float: right;" class="renamefileslink" target="categorieser">Renames these files</a>';
     html += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
     html += '<b>File list:</b><br>';
     var filesAndDirectories = getFileListForDirectory(CURRENT_DIRECTORY);
     for(var i = 0; i < filesAndDirectories.length; i++) {
         var filename = filesAndDirectories[i].substring(CURRENT_DIRECTORY.length+1);
 	
-        html += '<div style="padding: 1em; width: 300px; height: 300px; display: inline-block;">';
+        html += '<div style="padding: 1em; width: auto; height: auto; display: inline-block;" class="file" data-filename="' + filename + '">';
 	if(fs.statSync(filesAndDirectories[i]).isDirectory()) {
-	  html += '<div style="height: 100%; width: 100%; display: inline-block; vertical-align: bottom;">' + 
+	  html += '<div style="height: 300px; width: 300px; display: inline-block; vertical-align: bottom;">' + 
             '<b>Directory:</b><br>' + filename + 
             '</div>';
 	}
         else {
           html += filename + '<br>';
-          html += '<img src="'+filename+'" style="width: 100%; height: 100%;">';
+          html += '<img src="'+filename+'" style="width: 300px; height: 300px;">';
         }
         html += '</div>';
     }
+    // TODO: upgrade jquery and use $(this).data('filename');
+    html += '<script src="jquery-1.4.2.min.js"></script>';
+    html += '<script>';
+    html += 'function updateLink() { ' + 
+      'var new_link = $(\'.renamefileslink\').attr(\'data-link\');' +
+      '$(\'.selectedFile\').each(function() { new_link += \'&files[]=\' + $(this).attr(\'data-filename\'); });' + 
+      'console.log(\'New link: \' + new_link);' +
+      '$(\'.renamefileslink\').attr(\'href\', new_link);' +
+      '}';
+    html += '$(document).ready(function() {';
+    html += '  $(\'.file\').click(function() { $(this).toggleClass(\'selectedFile\'); updateLink(); });';
+    html += '});';
+    html += '</script>';
     html += '</body>';
       '</html>';
     response.writeHead(200, {"Content-Type": "text/html"});
     response.write(html + "\n");
     response.end();
+  }
+
+  else if(uri === '/filecategoriser') {
+    var url_parts = url.parse(request.url, true);
+    var query = url_parts.query;
+    var files = query['files[]'] || [];
+    console.log('-- FILES: ');
+    console.log(files);
+
+
+    if(request.method === 'POST') {
+      handlePost(function() {
+
+        var html = '<!DOCTYPE html>' +
+          '<html>' +
+          '    <body>';
+
+        var categoryname_new = response.post.categoryname_new;
+        categoryname_new = categoryname_new.replace(/\\/g, ''); // Remove slashes
+        categoryname_new_with_path = path.join(CURRENT_DIRECTORY, categoryname_new);
+        console.log('-- NEW FOLDER: ' + categoryname_new_with_path);
+        fs.mkdirSync(categoryname_new_with_path);
+        for(var i = 0; i < files.length; i++) {
+          var file = files[i];
+          filename_new_with_path = path.join(categoryname_new_with_path, file);
+          filename_old_with_path = path.join(CURRENT_DIRECTORY, file);
+          console.log('-- FILE: ' + file);
+          console.log('-- -- New - full path: ' + filename_new_with_path);
+          console.log('-- -- Old - full path: ' + filename_old_with_path);
+          fs.renameSync(filename_old_with_path, filename_new_with_path);
+          html += '      Ok - ' + file + '<br>';
+        }
+        html += '    </body>' +
+          '</html>';
+        response.writeHead(200, {"Content-Type": "text/html"});
+        response.write(html + "\n");
+        response.end();
+        return
+      });
+    }
+      else {
+      var html = '<!DOCTYPE html>' +
+        '<html>' +
+        '    <head>' +
+        '    </head>';
+      html += '<form method="POST">';
+      html += '<input name="categoryname_new" id="categoryname_new" style="width: 90%">';
+      html += '<input id="categoryname_submit" style="width: 10%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
+      html += '</form>';
+      for(var i = 0; i < files.length; i++) {
+        html += '<img src="' + files[i] + '" style="width: 150px; height: 150px;">';
+      }
+      html += '<table><tr><td>';
+      html += '<span id="categoryname_new_display"></span>';
+      html += '</td><td>';
+      for(var i = 0; i < files.length; i++) {
+        html += files[i] + '<br>';
+      }
+      html += '</td></tr></table>';
+      html += '<script>'+
+        'var elm = document.getElementById("categoryname_new"); '+
+        'var elm2 = document.getElementById("categoryname_new_display"); ' +
+        'var updateFunction = function() { console.log("New value: " + elm.value); elm2.innerHTML=elm.value; }; ' +
+        'elm.onclick = updateFunction; ' +
+        'elm.onkeyup = updateFunction; ' +
+        'elm.onchange = updateFunction; ' +
+        'updateFunction(); ' +
+        '</script>';
+      html += '</html>';
+      response.writeHead(200, {"Content-Type": "text/html"});
+      response.write(html + "\n");
+      response.end();
+      return
+    }
   }
 
   else if(uri === '/fileview') {
@@ -172,7 +279,9 @@ http.createServer(function(request, response) {
           var html = '<!DOCTYPE html>' +
             '<html>' +
             '    <body>' +
-            '      Ok' +
+            '      Ok<br>' +
+            '      - Old: ' + filename_old_with_path + '<br>' +
+            '      - New: ' + filename_new_with_path + '<br>' +
             '    </body>' +
             '</html>';
           response.writeHead(200, {"Content-Type": "text/html"});
