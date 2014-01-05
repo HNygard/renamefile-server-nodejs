@@ -40,6 +40,25 @@ http.createServer(function(request, response) {
     });
   }
 
+  function getFileListForDirectory(dir, getFromSubdirectories) {
+      var files = fs.readdirSync(dir);
+      var filesAndDirectories = [];
+      for(var i in files) {
+          if (!files.hasOwnProperty(i)) continue;
+          var name = dir+'/'+files[i];
+          if (fs.statSync(name).isDirectory()) {
+              filesAndDirectories.push(name);
+              if(getFromSubdirectories) {
+                 // TODO: getFileListForDirectory(name);
+              }
+          }
+          else {
+              filesAndDirectories.push(name);
+          }
+      }
+      return filesAndDirectories;
+  }
+
   if(uri === '/') {
     var mainpage_html = '<!DOCTYPE html>' +
       '<html>' +
@@ -47,13 +66,49 @@ http.createServer(function(request, response) {
       '    </head>' +
       '    <frameset framespacing="0" cols="150,*" frameborder="0" noresize>' +
       '        <frame name="top" src="/filelist" target="top">' +
-      '        <frame name="main" src="/fileview" target="main">' +
+      '        <frame name="main" src="/fileoverview" target="main">' +
       '    </frameset>' +
       '</html>';
     response.writeHead(200, {"Content-Type": "text/html"});
     response.write(mainpage_html + "\n");
     response.end();
     return
+  }
+
+  else if(uri === '/fileoverview') {
+    var url_parts = url.parse(request.url, true);
+    var query = url_parts.query;
+    console.log('-- FILE: ' + query.file);
+
+
+    var html = '<!DOCTYPE html>' +
+      '<html>' +
+      '    <head>' +
+      '    </head>';
+    html += '<body style="background-color: lightgray;">';
+    html += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
+    html += '<b>File list:</b><br>';
+    var filesAndDirectories = getFileListForDirectory(CURRENT_DIRECTORY);
+    for(var i = 0; i < filesAndDirectories.length; i++) {
+        var filename = filesAndDirectories[i].substring(CURRENT_DIRECTORY.length+1);
+	
+        html += '<div style="padding: 1em; width: 300px; height: 300px; display: inline-block;">';
+	if(fs.statSync(filesAndDirectories[i]).isDirectory()) {
+	  html += '<div style="height: 100%; width: 100%; display: inline-block; vertical-align: bottom;">' + 
+            '<b>Directory:</b><br>' + filename + 
+            '</div>';
+	}
+        else {
+          html += filename + '<br>';
+          html += '<img src="'+filename+'" style="width: 100%; height: 100%;">';
+        }
+        html += '</div>';
+    }
+    html += '</body>';
+      '</html>';
+    response.writeHead(200, {"Content-Type": "text/html"});
+    response.write(html + "\n");
+    response.end();
   }
 
   else if(uri === '/fileview') {
@@ -152,24 +207,6 @@ http.createServer(function(request, response) {
   }
 
   else if(uri === '/filelist') {
-    function getFiles(dir, getFromSubdirectories) {
-        var files = fs.readdirSync(dir);
-        var filesAndDirectories = [];
-        for(var i in files) {
-            if (!files.hasOwnProperty(i)) continue;
-            var name = dir+'/'+files[i];
-            if (fs.statSync(name).isDirectory()) {
-                filesAndDirectories.push(name);
-                if(getFromSubdirectories) {
-                   // TODO: getFiles(name);
-                }
-            }
-            else {
-                filesAndDirectories.push(name);
-            }
-        }
-        return filesAndDirectories;
-    }
 
     var html = '<!DOCTYPE html>' +
       '<html>' +
@@ -178,7 +215,7 @@ http.createServer(function(request, response) {
     html += '<body style="background-color: lightgray;">';
     html += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
     html += '<b>File list:</b><br>';
-    var filesAndDirectories = getFiles(CURRENT_DIRECTORY);
+    var filesAndDirectories = getFileListForDirectory(CURRENT_DIRECTORY);
     for(var i = 0; i < filesAndDirectories.length; i++) {
         var filename = filesAndDirectories[i].substring(CURRENT_DIRECTORY.length+1);
         html += '<span style="white-space:nowrap;">'+
