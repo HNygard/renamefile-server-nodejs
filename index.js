@@ -346,7 +346,6 @@ http.createServer(function(request, response) {
   }
 
   else {
-    if (fs.statSync(filename).isDirectory()) filename += '/index.html';
 
     fileExistsOr404(filename, function() {
 
