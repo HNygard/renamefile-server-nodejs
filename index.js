@@ -46,6 +46,27 @@ http.createServer(function(request, response) {
     });
   }
 
+// Source for naturalSorter: http://stackoverflow.com/a/2802804/298195
+function naturalSorter(as, bs){
+    var a, b, a1, b1, i= 0, n, L,
+    rx=/(\.\d+)|(\d+(\.\d+)?)|([^\d.]+)|(\.\D+)|(\.$)/g;
+    if(as=== bs) return 0;
+    a= as.toLowerCase().match(rx);
+    b= bs.toLowerCase().match(rx);
+    L= a.length;
+    while(i<L){
+        if(!b[i]) return 1;
+        a1= a[i],
+        b1= b[i++];
+        if(a1!== b1){
+            n= a1-b1;
+            if(!isNaN(n)) return n;
+            return a1>b1? 1:-1;
+        }
+    }
+    return b[i]? -1:0;
+}
+
   function getFileListForDirectory(dir, getFromSubdirectories) {
       var files = fs.readdirSync(dir);
       var filesAndDirectories = [];
@@ -129,6 +150,7 @@ http.createServer(function(request, response) {
     html += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
     html += '<b>File list:</b><br>';
     var filesAndDirectories = getFileListForDirectory(CURRENT_DIRECTORY);
+    filesAndDirectories.sort(naturalSorter);
     for(var i = 0; i < filesAndDirectories.length; i++) {
         var filename = filesAndDirectories[i].substring(CURRENT_DIRECTORY.length+1);
 	
@@ -332,6 +354,7 @@ http.createServer(function(request, response) {
     html += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
     html += '<b>File list:</b><br>';
     var filesAndDirectories = getFileListForDirectory(CURRENT_DIRECTORY);
+    filesAndDirectories.sort(naturalSorter);
     for(var i = 0; i < filesAndDirectories.length; i++) {
         var filename = filesAndDirectories[i].substring(CURRENT_DIRECTORY.length+1);
         html += '<span style="white-space:nowrap;">'+
