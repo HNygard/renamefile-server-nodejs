@@ -45,7 +45,7 @@ http.createServer(function(request, response) {
 
             successFunction();
         });
-    }
+    };
 
 // Source for naturalSorter: http://stackoverflow.com/a/2802804/298195
     function naturalSorter(as, bs) {
@@ -108,7 +108,7 @@ http.createServer(function(request, response) {
     }
 
     if (uri === '/') {
-        var mainpage_html = '<!DOCTYPE html>' +
+        var mainpage_html1 = '<!DOCTYPE html>' +
             '<html>' +
             '    <head>' +
             '    </head>' +
@@ -118,13 +118,12 @@ http.createServer(function(request, response) {
             '    </frameset>' +
             '</html>';
         response.writeHead(200, {"Content-Type": "text/html"});
-        response.write(mainpage_html + "\n");
+        response.write(mainpage_html1 + "\n");
         response.end();
-        return
     }
 
     else if (uri === '/fileoverview_with_rename') {
-        var mainpage_html = '<!DOCTYPE html>' +
+        var mainpage_html2 = '<!DOCTYPE html>' +
             '<html>' +
             '    <head>' +
             '    </head>' +
@@ -134,116 +133,115 @@ http.createServer(function(request, response) {
             '    </frameset>' +
             '</html>';
         response.writeHead(200, {"Content-Type": "text/html"});
-        response.write(mainpage_html + "\n");
+        response.write(mainpage_html2 + "\n");
         response.end();
-        return
     }
 
     else if (uri === '/fileoverview') {
-        var html = '<!DOCTYPE html>' +
+        var htmlFileoverview = '<!DOCTYPE html>' +
             '<html>' +
             '    <head>' +
             '       <style>.selectedFile { border: 3px solid green; }' +
             '       </style>' +
             '    </head>';
-        html += '<body style="background-color: lightgray;">';
-        html += '<a data-link="/filecategoriser?" href="/filecategoriser" style="position: fixed; top: 10px; right: 10px;" class="renamefileslink" target="categorieser">Renames these files</a>';
-        html += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
-        html += '<b>File list:</b><br>';
+        htmlFileoverview += '<body style="background-color: lightgray;">';
+        htmlFileoverview += '<a data-link="/filecategoriser?" href="/filecategoriser" style="position: fixed; top: 10px; right: 10px;" class="renamefileslink" target="categorieser">Renames these files</a>';
+        htmlFileoverview += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
+        htmlFileoverview += '<b>File list:</b><br>';
         var filesAndDirectories = getFileListForDirectory(CURRENT_DIRECTORY);
         filesAndDirectories.sort(naturalSorter);
         for (var i = 0; i < filesAndDirectories.length; i++) {
-            var filename = filesAndDirectories[i].substring(CURRENT_DIRECTORY.length + 1);
+            var currentFilename = filesAndDirectories[i].substring(CURRENT_DIRECTORY.length + 1);
 
-            html += '<div style="padding: 1em; width: auto; height: auto; display: inline-block;" class="file" data-filename="' + filename + '">';
+            htmlFileoverview += '<div style="padding: 1em; width: auto; height: auto; display: inline-block;" class="file" data-filename="' + currentFilename + '">';
             if (fs.statSync(filesAndDirectories[i]).isDirectory()) {
-                html += '<div style="height: 300px; width: 300px; display: inline-block; vertical-align: bottom;">' +
-                    '<b>Directory:</b><br>' + filename +
+                htmlFileoverview += '<div style="height: 300px; width: 300px; display: inline-block; vertical-align: bottom;">' +
+                    '<b>Directory:</b><br>' + currentFilename +
                     '</div>';
             }
             else {
-                html += filename + '<br>';
-                html += '<img src="' + filename + '" style="width: 300px; height: 300px;">';
+                htmlFileoverview += currentFilename + '<br>';
+                htmlFileoverview += '<img src="' + currentFilename + '" style="width: 300px; height: 300px;">';
             }
-            html += '</div>';
+            htmlFileoverview += '</div>';
         }
         // TODO: upgrade jquery and use $(this).data('filename');
-        html += '<script src="jquery-1.4.2.min.js"></script>';
-        html += '<script>';
-        html += 'function updateLink() { ' +
+        htmlFileoverview += '<script src="jquery-1.4.2.min.js"></script>';
+        htmlFileoverview += '<script>';
+        htmlFileoverview += 'function updateLink() { ' +
             'var new_link = $(\'.renamefileslink\').attr(\'data-link\');' +
             '$(\'.selectedFile\').each(function() { new_link += \'&files[]=\' + $(this).attr(\'data-filename\'); });' +
             'console.log(\'New link: \' + new_link);' +
             '$(\'.renamefileslink\').attr(\'href\', new_link);' +
             '}';
-        html += '$(document).ready(function() {';
-        html += '  $(\'.file\').click(function() { $(this).toggleClass(\'selectedFile\'); updateLink(); });';
-        html += '});';
-        html += '</script>';
-        html += '</body>';
-        '</html>';
+        htmlFileoverview += '$(document).ready(function() {';
+        htmlFileoverview += '  $(\'.file\').click(function() { $(this).toggleClass(\'selectedFile\'); updateLink(); });';
+        htmlFileoverview += '});';
+        htmlFileoverview += '</script>';
+        htmlFileoverview += '</body>';
+        htmlFileoverview += '</html>';
         response.writeHead(200, {"Content-Type": "text/html"});
-        response.write(html + "\n");
+        response.write(htmlFileoverview + "\n");
         response.end();
     }
 
     else if (uri === '/filecategoriser') {
-        var url_parts = url.parse(request.url, true);
-        var query = url_parts.query;
-        var files = query['files[]'] || [];
+        var url_parts1 = url.parse(request.url, true);
+        var query1 = url_parts1.query;
+        var files = query1['files[]'] || [];
         console.log('-- FILES: ');
         console.log(files);
 
         if (request.method === 'POST') {
             handlePost(function() {
 
-                var html = '<!DOCTYPE html>' +
+                var htmlFilecategorizerAfter = '<!DOCTYPE html>' +
                     '<html>' +
                     '    <body>';
 
                 var categoryname_new = response.post.categoryname_new;
                 categoryname_new = categoryname_new.replace(/\\/g, ''); // Remove slashes
-                categoryname_new_with_path = path.join(CURRENT_DIRECTORY, categoryname_new);
+                var categoryname_new_with_path = path.join(CURRENT_DIRECTORY, categoryname_new);
                 console.log('-- NEW FOLDER: ' + categoryname_new_with_path);
                 fs.mkdirSync(categoryname_new_with_path);
                 for (var i = 0; i < files.length; i++) {
                     var file = files[i];
-                    filename_new_with_path = path.join(categoryname_new_with_path, file);
-                    filename_old_with_path = path.join(CURRENT_DIRECTORY, file);
+                    var filename_new_with_path = path.join(categoryname_new_with_path, file);
+                    var filename_old_with_path = path.join(CURRENT_DIRECTORY, file);
                     console.log('-- FILE: ' + file);
                     console.log('-- -- New - full path: ' + filename_new_with_path);
                     console.log('-- -- Old - full path: ' + filename_old_with_path);
                     fs.renameSync(filename_old_with_path, filename_new_with_path);
-                    html += '      Ok - ' + file + '<br>';
+                    htmlFilecategorizerAfter += '      Ok - ' + file + '<br>';
                 }
-                html += '    </body>' +
+                htmlFilecategorizerAfter += '    </body>' +
                     '</html>';
                 response.writeHead(200, {"Content-Type": "text/html"});
-                response.write(html + "\n");
+                response.write(htmlFilecategorizerAfter + "\n");
                 response.end();
                 return
             });
         }
         else {
-            var html = '<!DOCTYPE html>' +
+            var htmlFilecategorizer = '<!DOCTYPE html>' +
                 '<html>' +
                 '    <head>' +
                 '    </head>';
-            html += '<form method="POST">';
-            html += '<input name="categoryname_new" id="categoryname_new" style="width: 90%">';
-            html += '<input id="categoryname_submit" style="width: 10%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
-            html += '</form>';
+            htmlFilecategorizer += '<form method="POST">';
+            htmlFilecategorizer += '<input name="categoryname_new" id="categoryname_new" style="width: 90%">';
+            htmlFilecategorizer += '<input id="categoryname_submit" style="width: 10%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
+            htmlFilecategorizer += '</form>';
             for (var i = 0; i < files.length; i++) {
-                html += '<img src="' + files[i] + '" style="width: 150px; height: 150px;">';
+                htmlFilecategorizer += '<img src="' + files[i] + '" style="width: 150px; height: 150px;">';
             }
-            html += '<table><tr><td>';
-            html += '<span id="categoryname_new_display"></span>';
-            html += '</td><td>';
+            htmlFilecategorizer += '<table><tr><td>';
+            htmlFilecategorizer += '<span id="categoryname_new_display"></span>';
+            htmlFilecategorizer += '</td><td>';
             for (var i = 0; i < files.length; i++) {
-                html += files[i] + '<br>';
+                htmlFilecategorizer += files[i] + '<br>';
             }
-            html += '</td></tr></table>';
-            html += '<script>' +
+            htmlFilecategorizer += '</td></tr></table>';
+            htmlFilecategorizer += '<script>' +
                 'var elm = document.getElementById("categoryname_new"); ' +
                 'var elm2 = document.getElementById("categoryname_new_display"); ' +
                 'var updateFunction = function() { console.log("New value: " + elm.value); elm2.innerHTML=elm.value; }; ' +
@@ -252,33 +250,31 @@ http.createServer(function(request, response) {
                 'elm.onchange = updateFunction; ' +
                 'updateFunction(); ' +
                 '</script>';
-            html += '</html>';
+            htmlFilecategorizer += '</html>';
             response.writeHead(200, {"Content-Type": "text/html"});
-            response.write(html + "\n");
+            response.write(htmlFilecategorizer + "\n");
             response.end();
-            return
         }
     }
 
     else if (uri === '/fileview') {
-        var url_parts = url.parse(request.url, true);
-        var query = url_parts.query;
-        console.log('-- FILE: ' + query.file);
+        var url_parts2 = url.parse(request.url, true);
+        var query2 = url_parts2.query;
+        console.log('-- FILE: ' + query2.file);
 
-        fileExistsOr404(query.file, function() {
+        fileExistsOr404(query2.file, function() {
             var html = '<!DOCTYPE html>' +
                 '<html>' +
                 '    <head>' +
                 '    </head>' +
                 '    <frameset framespacing="0" rows="*,150" frameborder="0" noresize>' +
-                '        <frame name="top" src="' + query.file + '">' +
-                '        <frame name="main" src="/filerename?file=' + query.file + '">' +
+                '        <frame name="top" src="' + query2.file + '">' +
+                '        <frame name="main" src="/filerename?file=' + query2.file + '">' +
                 '    </frameset>' +
                 '</html>';
             response.writeHead(200, {"Content-Type": "text/html"});
             response.write(html + "\n");
             response.end();
-            return
         });
     }
 
@@ -292,8 +288,8 @@ http.createServer(function(request, response) {
                 handlePost(function() {
                     var filename_new = response.post.filename_new + path.extname(query.file);
                     filename_new = filename_new.replace(/\\/g, ''); // Remove slashes
-                    filename_new_with_path = path.join(CURRENT_DIRECTORY, filename_new);
-                    filename_old_with_path = path.join(CURRENT_DIRECTORY, query.file);
+                    var filename_new_with_path = path.join(CURRENT_DIRECTORY, filename_new);
+                    var filename_old_with_path = path.join(CURRENT_DIRECTORY, query.file);
                     console.log('-- NEW FILENAME: ' + filename_new);
                     console.log('-- -- New - full path: ' + filename_new_with_path);
                     console.log('-- -- Old - full path: ' + filename_old_with_path);
@@ -309,24 +305,23 @@ http.createServer(function(request, response) {
                     response.writeHead(200, {"Content-Type": "text/html"});
                     response.write(html + "\n");
                     response.end();
-                    return
                 });
             }
             else {
 
-                var html = '<!DOCTYPE html>' +
+                var htmlFilerename = '<!DOCTYPE html>' +
                     '<html>' +
                     '    <head>' +
                     '    </head>';
-                html += '<body style="background-color: lightgray;">';
-                html += '<form method="POST">';
-                html += '<input name="filename_new" id="filename_new" style="width: 90%">';
-                html += '<input id="filename_submit" style="width: 10%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
-                html += '</form>';
-                html += 'Previous name: ' + query.file + '<br>';
-                html += 'New name: <span id="filename_new_display"></span>' + path.extname(query.file) + '<br>';
-                html += '</body>';
-                html += '<script>' +
+                htmlFilerename += '<body style="background-color: lightgray;">';
+                htmlFilerename += '<form method="POST">';
+                htmlFilerename += '<input name="filename_new" id="filename_new" style="width: 90%">';
+                htmlFilerename += '<input id="filename_submit" style="width: 10%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
+                htmlFilerename += '</form>';
+                htmlFilerename += 'Previous name: ' + query.file + '<br>';
+                htmlFilerename += 'New name: <span id="filename_new_display"></span>' + path.extname(query.file) + '<br>';
+                htmlFilerename += '</body>';
+                htmlFilerename += '<script>' +
                     'var elm = document.getElementById("filename_new"); ' +
                     'var elm2 = document.getElementById("filename_new_display"); ' +
                     'var updateFunction = function() { console.log("New value: " + elm.value); elm2.innerHTML=elm.value; }; ' +
@@ -335,37 +330,35 @@ http.createServer(function(request, response) {
                     'elm.onchange = updateFunction; ' +
                     'updateFunction(); ' +
                     '</script>';
-                '</html>';
+                htmlFilerename += '</html>';
                 response.writeHead(200, {"Content-Type": "text/html"});
-                response.write(html + "\n");
+                response.write(htmlFilerename + "\n");
                 response.end();
-                return
             }
         });
     }
 
     else if (uri === '/filelist') {
 
-        var html = '<!DOCTYPE html>' +
+        var htmlFilelist = '<!DOCTYPE html>' +
             '<html>' +
             '    <head>' +
             '    </head>';
-        html += '<body style="background-color: lightgray;">';
-        html += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
-        html += '<b>File list:</b><br>';
-        var filesAndDirectories = getFileListForDirectory(CURRENT_DIRECTORY);
-        filesAndDirectories.sort(naturalSorter);
-        for (var i = 0; i < filesAndDirectories.length; i++) {
-            var filename = filesAndDirectories[i].substring(CURRENT_DIRECTORY.length + 1);
-            html += '<span style="white-space:nowrap;">' +
-                '- <a href="/fileview?file=' + filename + '" target="main">' + filename + '</a></span><br />';
+        htmlFilelist += '<body style="background-color: lightgray;">';
+        htmlFilelist += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
+        htmlFilelist += '<b>File list:</b><br>';
+        var filesAndDirs = getFileListForDirectory(CURRENT_DIRECTORY);
+        filesAndDirs.sort(naturalSorter);
+        for (var l = 0; l < filesAndDirs.length; l++) {
+            var filenameForLink = filesAndDirs[l].substring(CURRENT_DIRECTORY.length + 1);
+            htmlFilelist += '<span style="white-space:nowrap;">' +
+                '- <a href="/fileview?file=' + filenameForLink + '" target="main">' + filenameForLink + '</a></span><br />';
         }
-        html += '</body>';
-        '</html>';
+        htmlFilelist += '</body>';
+        htmlFilelist += '</html>';
         response.writeHead(200, {"Content-Type": "text/html"});
-        response.write(html + "\n");
+        response.write(htmlFilelist + "\n");
         response.end();
-        return
     }
 
     else {
