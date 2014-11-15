@@ -108,12 +108,17 @@ http.createServer(function(request, response) {
     }
 
     if (uri === '/') {
+        var url_parts4 = url.parse(request.url, true);
+        var query4 = url_parts4.query;
+        var fileview = query4['fileview'] || [];
+        console.log('-- FILEVIEW: ');
+        console.log(fileview);
         var mainpage_html1 = '<!DOCTYPE html>' +
             '<html>' +
             '    <head>' +
             '    </head>' +
             '    <frameset framespacing="0" cols="150,*" frameborder="0" noresize>' +
-            '        <frame name="top" src="/filelist" target="top">' +
+            '        <frame name="top" src="/filelist?fileview='+ fileview +'" target="top">' +
             '        <frame name="main" src="/fileoverview_with_rename" target="main">' +
             '    </frameset>' +
             '</html>';
@@ -368,19 +373,32 @@ http.createServer(function(request, response) {
 
     else if (uri === '/filelist') {
 
+        var url_parts5 = url.parse(request.url, true);
+        var query5 = url_parts5.query;
+        var fileview2 = query5['fileview'] || [];
+        console.log('-- FILEVIEW: ');
+        console.log(fileview2);
         var htmlFilelist = '<!DOCTYPE html>' +
             '<html>' +
             '    <head>' +
             '    </head>';
         htmlFilelist += '<body style="background-color: lightgray;">';
+        htmlFilelist += '<style>.clicked { color: white; background-color: red; }</style>';
         htmlFilelist += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
         htmlFilelist += '<b>File list:</b><br>';
         var filesAndDirs = getFileListForDirectory(CURRENT_DIRECTORY);
         filesAndDirs.sort(naturalSorter);
         for (var l = 0; l < filesAndDirs.length; l++) {
             var filenameForLink = filesAndDirs[l].substring(CURRENT_DIRECTORY.length + 1);
+            var autoclick = '';
+            if(fileview2 === filenameForLink) {
+                autoclick = ' id="autoclick"';
+            }
             htmlFilelist += '<span style="white-space:nowrap;">' +
-                '- <a href="/fileview?file=' + filenameForLink + '" target="main">' + filenameForLink + '</a></span><br />';
+                '- <a href="/fileview?file=' + filenameForLink + '" target="main"'+autoclick+' onClick="this.className=\'clicked\'">' + filenameForLink + '</a></span><br />';
+        }
+        if(fileview2) {
+            htmlFilelist += '<script>document.getElementById("autoclick").click();</script>'
         }
         htmlFilelist += '</body>';
         htmlFilelist += '</html>';
