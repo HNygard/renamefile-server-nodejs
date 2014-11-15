@@ -268,12 +268,40 @@ http.createServer(function(request, response) {
                 '    <head>' +
                 '    </head>' +
                 '    <frameset framespacing="0" rows="*,150" frameborder="0" noresize>' +
-                '        <frame name="top" src="' + query2.file + '">' +
-                '        <frame name="main" src="/filerename?file=' + query2.file + '">' +
+                '        <frame name="viewimg" src="/fileviewimg?file=' + query2.file + '">' +
+                '        <frame name="rename" src="/filerename?file=' + query2.file + '">' +
                 '    </frameset>' +
                 '</html>';
             response.writeHead(200, {"Content-Type": "text/html"});
             response.write(html + "\n");
+            response.end();
+        });
+    }
+
+    else if (uri === '/fileviewimg') {
+        var url_parts3 = url.parse(request.url, true);
+        var query3 = url_parts3.query;
+        console.log('-- FILE: ' + query3.file);
+        fileExistsOr404(query3.file, function() {
+            var htmlFilerename = '<!DOCTYPE html>' +
+                '<html>' +
+                '    <head>' +
+                '    </head>';
+            htmlFilerename += '<body style="background-color: lightgray;">';
+            htmlFilerename += '<img src="' + query3.file + '" style="width: 100%"><br>';
+            htmlFilerename += '</body>';
+            htmlFilerename += '<script>' +
+                'var elm = document.getElementById("filename_new"); ' +
+                'var elm2 = document.getElementById("filename_new_display"); ' +
+                'var updateFunction = function() { console.log("New value: " + elm.value); elm2.innerHTML=elm.value; }; ' +
+                'elm.onclick = updateFunction; ' +
+                'elm.onkeyup = updateFunction; ' +
+                'elm.onchange = updateFunction; ' +
+                'updateFunction(); ' +
+                '</script>';
+            htmlFilerename += '</html>';
+            response.writeHead(200, {"Content-Type": "text/html"});
+            response.write(htmlFilerename + "\n");
             response.end();
         });
     }
