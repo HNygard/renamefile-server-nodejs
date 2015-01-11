@@ -357,7 +357,7 @@ http.createServer(function(request, response) {
                     '    </head>';
                 htmlFilerename += '<body style="background-color: lightgray;">';
                 htmlFilerename += '<form method="POST">';
-                htmlFilerename += '<input name="filename_new" id="filename_new" style="width: 90%">';
+                htmlFilerename += '<input name="filename_new" id="filename_new" style="width: 90%" autofocus>';
                 htmlFilerename += '<input id="filename_submit" style="width: 10%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
                 htmlFilerename += '</form>';
                 htmlFilerename += 'Previous name: ' + query.file + '<br>';
