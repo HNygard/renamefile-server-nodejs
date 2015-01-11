@@ -266,6 +266,11 @@ http.createServer(function(request, response) {
         var url_parts2 = url.parse(request.url, true);
         var query2 = url_parts2.query;
         console.log('-- FILE: ' + query2.file);
+        console.log('-- FILE NEXT: ' + query2.filenext);
+        var filenextqueryPart = '';
+        if(query2.filenext) {
+            filenextqueryPart = '&amp;filenext=' + query2.filenext;
+        }
 
         fileExistsOr404(query2.file, function() {
             var html = '<!DOCTYPE html>' +
@@ -274,7 +279,7 @@ http.createServer(function(request, response) {
                 '    </head>' +
                 '    <frameset framespacing="0" rows="*,150" frameborder="0" noresize>' +
                 '        <frame name="viewimg" src="/fileviewimg?file=' + query2.file + '">' +
-                '        <frame name="rename" src="/filerename?file=' + query2.file + '">' +
+                '        <frame name="rename" src="/filerename?file=' + query2.file + filenextqueryPart + '">' +
                 '    </frameset>' +
                 '</html>';
             response.writeHead(200, {"Content-Type": "text/html"});
@@ -315,6 +320,7 @@ http.createServer(function(request, response) {
         var url_parts = url.parse(request.url, true);
         var query = url_parts.query;
         console.log('-- FILE: ' + query.file);
+        console.log('-- NEXT FILE: ' + query.filenext);
         fileExistsOr404(query.file, function() {
 
             if (request.method === 'POST') {
@@ -332,8 +338,11 @@ http.createServer(function(request, response) {
                         '    <body>' +
                         '      Ok<br>' +
                         '      - Old: ' + filename_old_with_path + '<br>' +
-                        '      - New: ' + filename_new_with_path + '<br>' +
-                        '    </body>' +
+                        '      - New: ' + filename_new_with_path + '<br>';
+                    if(query.filenext) {
+                        html += '    <script>top.location.href="/?fileview=' + query.filenext + '"</script>';
+                    }
+                    html += '    </body>';
                         '</html>';
                     response.writeHead(200, {"Content-Type": "text/html"});
                     response.write(html + "\n");
@@ -384,7 +393,7 @@ http.createServer(function(request, response) {
             '    </head>';
         htmlFilelist += '<body style="background-color: lightgray;">';
         htmlFilelist += '<style>.clicked { color: white; background-color: red; }</style>';
-        htmlFilelist += 'Directory: ' + CURRENT_DIRECTORY + '<br><br>';
+        htmlFilelist += 'Directory: <a href="/" target="_top">' + CURRENT_DIRECTORY + '</a><br><br>';
         htmlFilelist += '<b>File list:</b><br>';
         var filesAndDirs = getFileListForDirectory(CURRENT_DIRECTORY);
         filesAndDirs.sort(naturalSorter);
@@ -394,8 +403,12 @@ http.createServer(function(request, response) {
             if(fileview2 === filenameForLink) {
                 autoclick = ' id="autoclick"';
             }
+            var filenextQuery = '';
+            if(filesAndDirs[l+1]) {
+                filenextQuery = '&amp;filenext=' + filesAndDirs[l+1].substring(CURRENT_DIRECTORY.length + 1);
+            }
             htmlFilelist += '<span style="white-space:nowrap;">' +
-                '- <a href="/fileview?file=' + filenameForLink + '" target="main"'+autoclick+' onClick="this.className=\'clicked\'">' + filenameForLink + '</a></span><br />';
+                '- <a href="/fileview?file=' + filenameForLink + filenextQuery + '" target="main"'+autoclick+' onClick="this.className=\'clicked\'">' + filenameForLink + '</a></span><br />';
         }
         if(fileview2) {
             htmlFilelist += '<script>document.getElementById("autoclick").click();</script>'
