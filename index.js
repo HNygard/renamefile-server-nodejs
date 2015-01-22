@@ -237,7 +237,9 @@ http.createServer(function(request, response) {
             htmlFilecategorizer += '<input id="categoryname_submit" style="width: 10%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
             htmlFilecategorizer += '</form>';
             for (var i = 0; i < files.length; i++) {
+                htmlFilecategorizer += '<a href="/fileviewimg?file=' + files[i] + '" target="overview">';
                 htmlFilecategorizer += '<img src="' + files[i] + '" style="width: 150px; height: 150px;">';
+                htmlFilecategorizer += '</a>';
             }
             htmlFilecategorizer += '<table><tr><td>';
             htmlFilecategorizer += '<span id="categoryname_new_display"></span>';
