@@ -15,6 +15,7 @@ console.log('    ' + CURRENT_DIRECTORY);
 http.createServer(function(request, response) {
 
     var uri = url.parse(request.url).pathname;
+    console.log('# -- # ' + uri + ' # -- #');
     var filename = path.join(CURRENT_DIRECTORY, decodeURIComponent(uri));
     if (uri === '/jquery-1.4.2.min.js') {
         // Hack to find the directory of our scripts.
@@ -166,7 +167,7 @@ http.createServer(function(request, response) {
             }
             else {
                 htmlFileoverview += currentFilename + '<br>';
-                htmlFileoverview += '<img src="' + currentFilename + '" style="width: 300px; height: 300px;">';
+                htmlFileoverview += '<img src="' + encodeURIComponent(currentFilename) + '" style="width: 300px; height: 300px;">';
             }
             htmlFileoverview += '</div>';
         }
@@ -237,8 +238,8 @@ http.createServer(function(request, response) {
             htmlFilecategorizer += '<input id="categoryname_submit" style="width: 10%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
             htmlFilecategorizer += '</form>';
             for (var i = 0; i < files.length; i++) {
-                htmlFilecategorizer += '<a href="/fileviewimg?file=' + files[i] + '" target="overview">';
-                htmlFilecategorizer += '<img src="' + files[i] + '" style="width: 150px; height: 150px;">';
+                htmlFilecategorizer += '<a href="/fileviewimg?file=' + encodeURIComponent(files[i]) + '" target="overview">';
+                htmlFilecategorizer += '<img src="' + encodeURIComponent(files[i]) + '" style="width: 150px; height: 150px;">';
                 htmlFilecategorizer += '</a>';
             }
             htmlFilecategorizer += '<table><tr><td>';
@@ -280,7 +281,7 @@ http.createServer(function(request, response) {
                 '    <head>' +
                 '    </head>' +
                 '    <frameset framespacing="0" rows="*,150" frameborder="0" noresize>' +
-                '        <frame name="viewimg" src="/fileviewimg?file=' + query2.file + '">' +
+                '        <frame name="viewimg" src="/fileviewimg?file=' + query2.file + filenextqueryPart + '">' +
                 '        <frame name="rename" src="/filerename?file=' + query2.file + filenextqueryPart + '">' +
                 '    </frameset>' +
                 '</html>';
@@ -294,6 +295,7 @@ http.createServer(function(request, response) {
         var url_parts3 = url.parse(request.url, true);
         var query3 = url_parts3.query;
         console.log('-- FILE: ' + query3.file);
+        console.log('-- NEXT FILE: ' + query3.filenext);
         fileExistsOr404(query3.file, function() {
             var htmlFilerename = '<!DOCTYPE html>' +
                 '<html>' +
@@ -301,6 +303,9 @@ http.createServer(function(request, response) {
                 '    </head>';
             htmlFilerename += '<body style="background-color: lightgray;">';
             htmlFilerename += '<img src="' + query3.file + '" style="width: 100%"><br>';
+            if (query3.filenext) {
+                htmlFilerename += '<img src="' + query3.filenext + '" style="width: 20%; position: fixed; top: 0; right: 0;border: 1px solid red;opacity: 0.6;"><br>';
+            }
             htmlFilerename += '</body>';
             htmlFilerename += '<script>' +
                 'var elm = document.getElementById("filename_new"); ' +
