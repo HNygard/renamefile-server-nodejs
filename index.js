@@ -17,12 +17,12 @@ http.createServer(function(request, response) {
     var uri = url.parse(request.url).pathname;
     console.log('# -- # ' + uri + ' # -- #');
     var filename = path.join(CURRENT_DIRECTORY, decodeURIComponent(uri));
-    if (uri === '/jquery-1.4.2.min.js') {
+    if (uri === '/jquery.min.js') {
         // Hack to find the directory of our scripts.
         // TODO: use a function instead
         var lib_directory = process.mainModule.filename.substring(0,
                                                                   process.mainModule.filename.length - 'index.js'.length);
-        filename = path.join(lib_directory, uri);
+        filename = path.join(lib_directory, 'node_modules/jquery/dist/jquery.min.js');
     }
 
     console.log(request.method + ' ' + request.url);
@@ -171,8 +171,7 @@ http.createServer(function(request, response) {
             }
             htmlFileoverview += '</div>';
         }
-        // TODO: upgrade jquery and use $(this).data('filename');
-        htmlFileoverview += '<script src="jquery-1.4.2.min.js"></script>';
+        htmlFileoverview += '<script src="jquery.min.js"></script>';
         htmlFileoverview += '<script>';
         htmlFileoverview += 'function updateLink() { ' +
             'var new_link = $(\'.renamefileslink\').attr(\'data-link\');' +
