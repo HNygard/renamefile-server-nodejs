@@ -398,7 +398,7 @@ $(function() {
 			comment = comment.substr('2017-01-01 - '.length);
 		}
 
-		var regex_amount = /^([0-9\.,]*) kr - /g;
+		var regex_amount = /^([0-9\.,]*) kr (INN )?- /g;
 		var match = regex_amount.exec(comment);
 		if (match) {
 			// -> Starts with "123,12 kr - "
