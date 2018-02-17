@@ -203,7 +203,7 @@ $(function() {
 	}
 	function htmlSelectTransaction() {
 		var html_transactions = htmlStatus();
-		var button = function(transaction) {
+		var button = function(transaction, btn_class) {
 			var labels = {};
 			for (var j = 0; j < transaction.labels.length; j++) {
 				labels[transaction.labels[j].label + '--' +
@@ -226,7 +226,7 @@ $(function() {
 			}
 			return '<div class="col-12" style="padding-top: 5px; padding-bottom: 5px;">' +
 				'<button data-transaction-id="' + transaction.id + '"' +
-					' class="btn btn-default account-transaction"' +
+					' class="btn ' + btn_class + ' account-transaction"' +
 					' style="width: 100%">' +
 					(a.getYear() - 100 + 2000) + '-' + month + '-' + day + ': ' +
 					transaction.amount_debit + ' ' + transaction.currency_debit + '<br>' +
@@ -234,11 +234,19 @@ $(function() {
 				'</button>' +
 				'</div>';
 		}
+		var amount = parseFloat(selected_amount.replace(',', '.'));
 		var bankAccounts = Object.keys(accountTransaction);
 		for(var i = 0; i < bankAccounts.length; i++) {
-			console.log(bankAccounts, i, bankAccounts[i], accountTransaction[bankAccounts[i]]);
 			for(var j = 0; j < accountTransaction[bankAccounts[i]].transactions.length; j++) {
-				html_transactions += button(accountTransaction[bankAccounts[i]].transactions[j]);
+				if (accountTransaction[bankAccounts[i]].transactions[j].amount_debit == amount) {
+					html_transactions += button(accountTransaction[bankAccounts[i]].transactions[j], 'btn-primary');
+				}
+			}
+		}
+		var bankAccounts = Object.keys(accountTransaction);
+		for(var i = 0; i < bankAccounts.length; i++) {
+			for(var j = 0; j < accountTransaction[bankAccounts[i]].transactions.length; j++) {
+				html_transactions += button(accountTransaction[bankAccounts[i]].transactions[j], 'btn-default');
 			}
 		}
 		return '<div class="container-fluid"><div class="row">' + html_transactions + '</div></div>';
