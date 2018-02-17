@@ -454,7 +454,10 @@ $(function() {
 		selected_payment_type = $(this).data('payment-type');
 
 		function startAccountTransactionPromise() {
-			accountTransactionPromise = fetch('/account_transactions_api/' + selected_source.accounts.join(',') + '/1471557600/1471557600')
+			var selected_date_unixtime = (new Date(selected_year + '-' + selected_month + '-' + selected_day)).getTime() / 1000;
+			var unixtime_from = selected_date_unixtime - (60 * 60 * 24 * 10);
+			var unixtime_to = selected_date_unixtime + (60 * 60 * 24 * 10);
+			accountTransactionPromise = fetch('/account_transactions_api/' + selected_source.accounts.join(',') + '/' + unixtime_from + '/' + unixtime_to);
 		}
 
 		if (selected_payment_type === 'INVOICE') {
