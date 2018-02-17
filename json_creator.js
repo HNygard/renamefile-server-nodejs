@@ -268,7 +268,7 @@ $(function() {
 	function htmlComment() {
 		var html_comment = htmlStatus();
 		html_comment += '<div class="col-12" style="padding-top: 5px; padding-bottom: 5px;">' +
-			'<input type="text" id="comment_input" style="width: 100%" value="' + htmlEncode(selected_comment) + '">' +
+			'<input type="text" id="comment_input" style="width: 100%" value="' + htmlEncode(comment) + '">' +
 			'</div>';
 		html_comment += '<div class="col-12" style="padding-top: 5px; padding-bottom: 5px;">' +
 			'<button ' +
