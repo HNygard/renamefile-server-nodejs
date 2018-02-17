@@ -220,7 +220,7 @@ $(function() {
 			if (month < 10) {
 				month = '0' + month;
 			}
-			var day = a.getDay() + 1;
+			var day = a.getDate() + 1;
 			if (day < 10) {
 				day = '0' + day;
 			}
