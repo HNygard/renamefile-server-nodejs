@@ -150,6 +150,7 @@ http.createServer(function(request, response) {
         var mainpage_html1 = '<!DOCTYPE html>' +
             '<html>' +
             '    <head>' +
+            '        <meta charset="utf-8"/>' +
             '    </head>' +
             '    <frameset framespacing="0" cols="150,*" frameborder="0" noresize>' +
             '        <frame name="top" src="/filelist?fileview='+ fileview + filenextqueryPart + '" target="top">' +
@@ -165,6 +166,7 @@ http.createServer(function(request, response) {
         var mainpage_html2 = '<!DOCTYPE html>' +
             '<html>' +
             '    <head>' +
+            '        <meta charset="utf-8"/>' +
             '    </head>' +
             '    <frameset framespacing="0" rows="50%,50%" frameborder="0" noresize>' +
             '        <frame name="overview" src="/fileoverview" target="categorieser">' +
@@ -180,6 +182,7 @@ http.createServer(function(request, response) {
         var htmlFileoverview = '<!DOCTYPE html>' +
             '<html>' +
             '    <head>' +
+            '        <meta charset="utf-8"/>' +
             '       <style>.selectedFile { border: 3px solid green; }' +
             '       </style>' +
             '    </head>';
@@ -264,6 +267,7 @@ http.createServer(function(request, response) {
             var htmlFilecategorizer = '<!DOCTYPE html>' +
                 '<html>' +
                 '    <head>' +
+                '        <meta charset="utf-8"/>' +
                 '    </head>';
             htmlFilecategorizer += '<form method="POST">';
             htmlFilecategorizer += '<input name="categoryname_new" id="categoryname_new" style="width: 90%">';
@@ -319,6 +323,7 @@ http.createServer(function(request, response) {
             var html = '<!DOCTYPE html>' +
                 '<html>' +
                 '    <head>' +
+                '        <meta charset="utf-8"/>' +
                     '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">' +
                 '    </head>' +
                 '    <frameset framespacing="0" rows="*,174" frameborder="0" noresize>' +
@@ -341,7 +346,8 @@ http.createServer(function(request, response) {
             var htmlFilerename = '<!DOCTYPE html>' +
                 '<html>' +
                 '    <head>' +
-                '<script src="hammer.min.js"></script>' +
+                '        <meta charset="utf-8"/>' +
+                '        <script src="hammer.min.js"></script>' +
                 '    </head>';
             htmlFilerename += '<body style="background-color: lightgray;">';
             htmlFilerename += '<div class="pinch-zoom-container"><img id="pinch-zoom-image-id" src="' + query3.file + '" style="width: 100%"  class="pinch-zoom-image" onload="onLoad()"><br>';
@@ -467,6 +473,7 @@ http.createServer(function(request, response) {
                 var htmlFilerename = '<!DOCTYPE html>' +
                     '<html>' +
                     '    <head>' +
+                '        <meta charset="utf-8"/>' +
                     '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">' +
                     '<script src="jquery.min.js"></script>' +
                     '<script src="json_creator.js"></script>' +
@@ -511,6 +518,7 @@ http.createServer(function(request, response) {
         var htmlFilelist = '<!DOCTYPE html>' +
             '<html>' +
             '    <head>' +
+            '        <meta charset="utf-8"/>' +
             '    </head>';
         htmlFilelist += '<body style="background-color: lightgray;">';
         htmlFilelist += '<style>.clicked { color: white; background-color: red; }</style>';
