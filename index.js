@@ -57,7 +57,8 @@ http.createServer(function(request, response) {
         '.html': "text/html",
         '.css': "text/css",
         '.js': "text/javascript",
-        '.json': "application/json"
+        '.json': "application/json",
+        '.pdf': "application/pdf"
     };
 
     var fileExistsOr404 = function(filenameThatShouldExist, successFunction) {
@@ -310,13 +311,18 @@ http.createServer(function(request, response) {
         }
 
         fileExistsOr404(query2.file, function() {
+            var fileviewimg = '/fileviewimg?file=' + query2.file + filenextqueryPart;
+            if (query2.file.endsWith('.PDF') || query2.file.endsWith('.pdf')) {
+                // -> A PDF. Lets use Chrome PDF viewer.
+                fileviewimg = query2.file;
+            }
             var html = '<!DOCTYPE html>' +
                 '<html>' +
                 '    <head>' +
                     '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">' +
                 '    </head>' +
                 '    <frameset framespacing="0" rows="*,174" frameborder="0" noresize>' +
-                '        <frame name="viewimg" src="/fileviewimg?file=' + query2.file + filenextqueryPart + '">' +
+                '        <frame name="viewimg" src="' + fileviewimg + '">' +
                 '        <frame name="rename" src="/filerename?file=' + query2.file + filenextqueryPart + '">' +
                 '    </frameset>' +
                 '</html>';
@@ -571,8 +577,14 @@ http.createServer(function(request, response) {
 
                 console.log('-- Sending file: ' + filename);
                 var headers = {};
-                var contentType = contentTypesByExtension[path.extname(filename)];
-                if (contentType) headers["Content-Type"] = contentType;
+                var extension = path.extname(filename);
+                var contentType = contentTypesByExtension[extension];
+                if (contentType) {
+                    headers["Content-Type"] = contentType;
+                }
+                if (extension.toLowerCase() === '.pdf') {
+                    headers['Content-Disposition'] = 'inline; filename="not-for-saving.pdf"';
+                } 
                 response.writeHead(200, headers);
                 response.write(file, "binary");
                 response.end();

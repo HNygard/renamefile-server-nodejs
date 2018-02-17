@@ -365,7 +365,7 @@ $(function() {
 		comment = '';
 
 		var url = new URL(document.location.href);
-		var filename_without_extention = url.searchParams.get("file")
+		var filename_without_extension = url.searchParams.get("file")
 			.replace('.JPG', '')
 			.replace('.jpg', '')
 			.replace('.PNG', '')
@@ -373,10 +373,10 @@ $(function() {
 			.replace('.PDF', '')
 			.replace('.pdf', '');
 		// Ignore thoses with only numbers
-		if (isNaN(filename_without_extention)) {
+		if (isNaN(filename_without_extension)) {
 			// -> Not a number, guessing some content is present in file name
-			console.log('Reading from file name: ' + filename_without_extention);
-			comment = filename_without_extention;
+			console.log('Reading from file name: ' + filename_without_extension);
+			comment = filename_without_extension;
 		}
 
 		var regex_date = /^([0-9][0-9][0-9][0-9])-([0-9][0-9])-([0-9][0-9]) - /g;
