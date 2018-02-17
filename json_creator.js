@@ -31,12 +31,15 @@ $(function() {
 			sources = data.sources;
 			reset();
 		});
-	function setSelectedSource() {	
+	function setSelectedSource() {
 		for(var i = 0; i < sources.length; i++) {
 			if (sources[i].folder === selected_accounting_subject) {
 				selected_source = sources[i];
 			}
 		}
+	}
+	function htmlEncode(value){
+		return $('<div/>').text(value).html();
 	}
 	function htmlStatusInner() {
 		var status = '';
@@ -239,7 +242,7 @@ $(function() {
 			}
 		}
 		return '<div class="container-fluid"><div class="row">' + html_transactions + '</div></div>';
-		
+
 	}
 	function htmlAccountingPost() {
 		var html_accounting_post = htmlStatus();
@@ -265,7 +268,7 @@ $(function() {
 	function htmlComment() {
 		var html_comment = htmlStatus();
 		html_comment += '<div class="col-12" style="padding-top: 5px; padding-bottom: 5px;">' +
-			'<input type="text" id="comment_input" style="width: 100%">' +
+			'<input type="text" id="comment_input" style="width: 100%" value="' + htmlEncode(selected_comment) + '">' +
 			'</div>';
 		html_comment += '<div class="col-12" style="padding-top: 5px; padding-bottom: 5px;">' +
 			'<button ' +
@@ -318,12 +321,6 @@ $(function() {
 	//                                ||
 	//                                \/
 	//                      [ ----- comment ------------- ]
-	//                
-
-	// TODO:
-	// [ ] Payment type selection
-	// [ ] Select transaction for bank og invoice
-	// [ ] Adjust json
 
 	function updateBindings() {
 		$('.status-row', creator).click(reset);
@@ -366,7 +363,55 @@ $(function() {
 		selected_accounting_subject = '';
 		selected_accounting_post = '';
 		comment = '';
-		updateHtml(htmlYears('year_selector'));
+
+		var url = new URL(document.location.href);
+		var filename_without_extention = url.searchParams.get("file")
+			.replace('.JPG', '')
+			.replace('.jpg', '')
+			.replace('.PNG', '')
+			.replace('.png', '')
+			.replace('.PDF', '')
+			.replace('.pdf', '');
+		// Ignore thoses with only numbers
+		if (isNaN(filename_without_extention)) {
+			// -> Not a number, guessing some content is present in file name
+			console.log('Reading from file name: ' + filename_without_extention);
+			comment = filename_without_extention;
+		}
+
+		var regex_date = /^([0-9][0-9][0-9][0-9])-([0-9][0-9])-([0-9][0-9]) - /g;
+		var match = regex_date.exec(comment);
+		if (match) {
+			// -> Starts with "2018-02-18 - "
+			selected_year = match[1];
+			selected_month = match[2];
+			selected_day = match[3];
+			console.log('- Found date: ' + selected_year + '-' + selected_month + '-' + selected_day);
+			comment = comment.substr('2017-01-01 - '.length);
+		}
+
+		var regex_amount = /^([0-9\.,]*) kr - /g;
+		var match = regex_amount.exec(comment);
+		if (match) {
+			// -> Starts with "123,12 kr - "
+			selected_amount = match[1];
+			console.log('- Found amount: ' + selected_amount);
+			comment = comment.substr(match[0].length);
+		}
+
+		if (selected_year && selected_month && selected_day) {
+			// -> Already have a date
+			if (selected_amount) {
+				// -> Already amount
+				updateHtml(htmlAccountingSubject());
+			}
+			else {
+				updateHtml(htmlAmount());
+			}
+		}
+		else {
+			updateHtml(htmlYears('year_selector'));
+		}
 	}
 
 	// :: 2 - Find month
