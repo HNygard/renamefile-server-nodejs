@@ -12,17 +12,43 @@ var CURRENT_DIRECTORY = process.cwd();
 console.log('Starting server in:');
 console.log('    ' + CURRENT_DIRECTORY);
 
+function getLocalFile(filename) {
+	// Hack to find the directory of our scripts.
+        var lib_directory = process.mainModule.filename.substring(0, process.mainModule.filename.length - 'index.js'.length);
+        return path.join(lib_directory, filename);
+}
+
 http.createServer(function(request, response) {
 
     var uri = url.parse(request.url).pathname;
     console.log('# -- # ' + uri + ' # -- #');
     var filename = path.join(CURRENT_DIRECTORY, decodeURIComponent(uri));
     if (uri === '/jquery.min.js') {
-        // Hack to find the directory of our scripts.
-        // TODO: use a function instead
-        var lib_directory = process.mainModule.filename.substring(0,
-                                                                  process.mainModule.filename.length - 'index.js'.length);
-        filename = path.join(lib_directory, 'node_modules/jquery/dist/jquery.min.js');
+        filename = getLocalFile('node_modules/jquery/dist/jquery.min.js');
+    }
+    if (uri === '/hammer.min.js') {
+        filename = getLocalFile('node_modules/hammerjs/hammer.min.js');
+    }
+    if (uri === '/bootstrap.min.css') {
+        filename = getLocalFile('node_modules/bootstrap/dist/css/bootstrap.min.css');
+    }
+    if (uri === '/bootstrap.min.css.map') {
+        filename = getLocalFile('node_modules/bootstrap/dist/css/bootstrap.min.css.map');
+    }
+    if (uri === '/bootstrap.min.js') {
+        filename = getLocalFile('node_modules/bootstrap/dist/js/bootstrap.min.js');
+    }
+    if (uri === '/bootstrap.min.js.map') {
+        filename = getLocalFile('node_modules/bootstrap/dist/js/bootstrap.min.js.map');
+    }
+    if (uri === '/json_creator.js') {
+        filename = getLocalFile('json_creator.js');
+    }
+    if (uri === '/zoom.js') {
+        filename = getLocalFile('zoom.js');
+    }
+    if (uri === '/sources.json') {
+        filename = getLocalFile('sources.json');
     }
 
     console.log(request.method + ' ' + request.url);
@@ -30,7 +56,8 @@ http.createServer(function(request, response) {
     var contentTypesByExtension = {
         '.html': "text/html",
         '.css': "text/css",
-        '.js': "text/javascript"
+        '.js': "text/javascript",
+        '.json': "application/json"
     };
 
     var fileExistsOr404 = function(filenameThatShouldExist, successFunction) {
@@ -48,7 +75,7 @@ http.createServer(function(request, response) {
         });
     };
 
-// Source for naturalSorter: http://stackoverflow.com/a/2802804/298195
+    // Source for naturalSorter: http://stackoverflow.com/a/2802804/298195
     function naturalSorter(as, bs) {
         var a, b, a1, b1, i = 0, n, L,
             rx = /(\.\d+)|(\d+(\.\d+)?)|([^\d.]+)|(\.\D+)|(\.$)/g;
@@ -114,12 +141,17 @@ http.createServer(function(request, response) {
         var fileview = query4['fileview'] || [];
         console.log('-- FILEVIEW: ');
         console.log(fileview);
+        var filenextqueryPart = '';
+        if(query4.categorize) {
+            filenextqueryPart += '&amp;categorize=true';
+        }
+
         var mainpage_html1 = '<!DOCTYPE html>' +
             '<html>' +
             '    <head>' +
             '    </head>' +
             '    <frameset framespacing="0" cols="150,*" frameborder="0" noresize>' +
-            '        <frame name="top" src="/filelist?fileview='+ fileview +'" target="top">' +
+            '        <frame name="top" src="/filelist?fileview='+ fileview + filenextqueryPart + '" target="top">' +
             '        <frame name="main" src="/fileoverview_with_rename" target="main">' +
             '    </frameset>' +
             '</html>';
@@ -271,15 +303,19 @@ http.createServer(function(request, response) {
         console.log('-- FILE NEXT: ' + query2.filenext);
         var filenextqueryPart = '';
         if(query2.filenext) {
-            filenextqueryPart = '&amp;filenext=' + query2.filenext;
+            filenextqueryPart += '&amp;filenext=' + query2.filenext;
+        }
+        if(query2.categorize) {
+            filenextqueryPart += '&amp;categorize=true';
         }
 
         fileExistsOr404(query2.file, function() {
             var html = '<!DOCTYPE html>' +
                 '<html>' +
                 '    <head>' +
+                    '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">' +
                 '    </head>' +
-                '    <frameset framespacing="0" rows="*,150" frameborder="0" noresize>' +
+                '    <frameset framespacing="0" rows="*,174" frameborder="0" noresize>' +
                 '        <frame name="viewimg" src="/fileviewimg?file=' + query2.file + filenextqueryPart + '">' +
                 '        <frame name="rename" src="/filerename?file=' + query2.file + filenextqueryPart + '">' +
                 '    </frameset>' +
@@ -299,21 +335,24 @@ http.createServer(function(request, response) {
             var htmlFilerename = '<!DOCTYPE html>' +
                 '<html>' +
                 '    <head>' +
+                '<script src="hammer.min.js"></script>' +
                 '    </head>';
             htmlFilerename += '<body style="background-color: lightgray;">';
-            htmlFilerename += '<img src="' + query3.file + '" style="width: 100%"><br>';
+            htmlFilerename += '<div class="pinch-zoom-container"><img id="pinch-zoom-image-id" src="' + query3.file + '" style="width: 100%"  class="pinch-zoom-image" onload="onLoad()"><br>';
+            //htmlFilerename += '<img src="' + query3.file + '" style="width: 100%" id="main_image"><br>';
             if (query3.filenext) {
                 htmlFilerename += '<img src="' + query3.filenext + '" style="width: 20%; position: fixed; top: 0; right: 0;border: 1px solid red;opacity: 0.6;"><br>';
             }
             htmlFilerename += '</body>';
+            htmlFilerename += '<script src="zoom.js"></script>';
             htmlFilerename += '<script>' +
-                'var elm = document.getElementById("filename_new"); ' +
-                'var elm2 = document.getElementById("filename_new_display"); ' +
-                'var updateFunction = function() { console.log("New value: " + elm.value); elm2.innerHTML=elm.value; }; ' +
-                'elm.onclick = updateFunction; ' +
-                'elm.onkeyup = updateFunction; ' +
-                'elm.onchange = updateFunction; ' +
-                'updateFunction(); ' +
+                'var myElement = document.getElementById("main_image");' +
+                'var mc = new Hammer.Manager(myElement);' +
+                'mc.add( new Hammer.Tap({ event: "doubletap", taps: 2 }) );' +
+                'mc.on("doubletap", function(ev) {' +
+                '    console.log(ev.type);' +
+                '});' +
+                '' +
                 '</script>';
             htmlFilerename += '</html>';
             response.writeHead(200, {"Content-Type": "text/html"});
@@ -331,7 +370,69 @@ http.createServer(function(request, response) {
 
             if (request.method === 'POST') {
                 handlePost(function() {
-                    var filename_new = response.post.filename_new + path.extname(query.file);
+                    var filename_new;
+                    if(response.post.data_year) {
+                        // -> Mobile categorizer
+                        // Folders
+                        // <accounting subject>/<year>/<year>-<month>-<day> - <post> - <amount> kr - <comment>
+                        var subject_folder = path.join(CURRENT_DIRECTORY, response.post.data_accounting_subject);
+                        if (!fs.existsSync(subject_folder)) {
+                            fs.mkdirSync(subject_folder);
+                        }
+                        var year_folder = path.join(CURRENT_DIRECTORY, response.post.data_accounting_subject + '/' + response.post.data_year);
+                        if (!fs.existsSync(year_folder)) {
+                            fs.mkdirSync(year_folder);
+                        }
+
+                        var currency = 'NOK';
+                        var currencyDisplay = 'kr';
+                        var the_filename = response.post.data_year + '-' + response.post.data_month + '-' + response.post.data_day +
+                            ' - ' + response.post.data_accounting_post +
+                            ' - ' + response.post.data_amount + ' ' + currencyDisplay +
+                            (response.post.data_comment ? (' - ' + response.post.data_comment) : '');
+                        filename_new = response.post.data_accounting_subject +
+                            '/' + response.post.data_year +
+                            '/' + the_filename;
+                        var doc_folder = path.join(CURRENT_DIRECTORY, filename_new);
+                        if (!fs.existsSync(doc_folder)) {
+                            fs.mkdirSync(doc_folder);
+                        }
+                        filename_new = filename_new + '/' + the_filename;
+
+                        var jsonObj = {};
+                        jsonObj.date = response.post.data_year + '-' + response.post.data_month + '-' + response.post.data_day;
+                        jsonObj.accounting_subject = response.post.data_accounting_subject;
+                        if (response.post.data_accounting_post) {
+                            jsonObj.accounting_post = response.post.data_accounting_post;
+                        }
+                        if (response.post.data_payment_type) {
+                            jsonObj.payment_type = response.post.data_payment_type;
+                        }
+                        if (response.post.data_transaction_id) {
+                            jsonObj.account_transaction_id = response.post.data_transaction_id;
+                        }
+                        if (response.post.data_invoice_date_year) {
+                            jsonObj.invoice_date = response.post.data_invoice_date_year + '-' + response.post.data_invoice_date_month + '-' + response.post.data_invoice_date_day;
+                        }
+                        jsonObj.amount = response.post.data_amount;
+                        jsonObj.currency = currency;
+                        jsonObj.comment = response.post.data_comment;
+			jsonObj.transactions = [];
+			jsonObj.transactions.push({
+				"amount": response.post.data_amount,
+				"currency": currency,
+				"comment": response.post.data_comment
+			});
+                        var json_file = path.join(CURRENT_DIRECTORY, filename_new + '.json');
+                        var jsonString = JSON.stringify(jsonObj, null, 4);
+                        console.log('-- Writing to JSON file [' + json_file + '].');
+                        console.log(jsonString);
+                        fs.writeFileSync(json_file, jsonString);
+                    }
+                    else {
+                        filename_new = response.post.filename_new;
+                    }
+                    filename_new = filename_new + path.extname(query.file);
                     filename_new = filename_new.replace(/\\/g, ''); // Remove slashes
                     var filename_new_with_path = path.join(CURRENT_DIRECTORY, filename_new);
                     var filename_old_with_path = path.join(CURRENT_DIRECTORY, query.file);
@@ -346,7 +447,7 @@ http.createServer(function(request, response) {
                         '      - Old: ' + filename_old_with_path + '<br>' +
                         '      - New: ' + filename_new_with_path + '<br>';
                     if(query.filenext) {
-                        html += '    <script>top.location.href="/?fileview=' + query.filenext + '"</script>';
+                        html += '    <script>top.location.href="/?fileview=' + query.filenext + (query.categorize ? '&categorize=true' : '') + '"</script>';
                     }
                     html += '    </body>';
                         '</html>';
@@ -360,14 +461,22 @@ http.createServer(function(request, response) {
                 var htmlFilerename = '<!DOCTYPE html>' +
                     '<html>' +
                     '    <head>' +
+                    '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">' +
+                    '<script src="jquery.min.js"></script>' +
+                    '<script src="json_creator.js"></script>' +
+                    '<script src="bootstrap.min.js"></script>' +
+                    '<link href="bootstrap.min.css" rel="stylesheet">' +
                     '    </head>';
                 htmlFilerename += '<body style="background-color: lightgray;">';
+                htmlFilerename += '<div id="main_form">';
                 htmlFilerename += '<form method="POST">';
                 htmlFilerename += '<input name="filename_new" id="filename_new" style="width: 90%" autofocus>';
                 htmlFilerename += '<input id="filename_submit" style="width: 10%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
                 htmlFilerename += '</form>';
                 htmlFilerename += 'Previous name: ' + query.file + '<br>';
                 htmlFilerename += 'New name: <span id="filename_new_display"></span>' + path.extname(query.file) + '<br>';
+                htmlFilerename += '</div>';
+                htmlFilerename += '<div id="json_creator"></div>';
                 htmlFilerename += '</body>';
                 htmlFilerename += '<script>' +
                     'var elm = document.getElementById("filename_new"); ' +
@@ -400,6 +509,7 @@ http.createServer(function(request, response) {
         htmlFilelist += '<body style="background-color: lightgray;">';
         htmlFilelist += '<style>.clicked { color: white; background-color: red; }</style>';
         htmlFilelist += 'Directory: <a href="/" target="_top">' + CURRENT_DIRECTORY + '</a><br><br>';
+        htmlFilelist += '<a href="/?categorize=true" target="_top">Categorizer</a><br><br>';
         htmlFilelist += '<b>File list:</b><br>';
         var filesAndDirs = getFileListForDirectory(CURRENT_DIRECTORY);
         filesAndDirs.sort(naturalSorter);
@@ -411,10 +521,15 @@ http.createServer(function(request, response) {
             }
             var filenextQuery = '';
             if(filesAndDirs[l+1]) {
-                filenextQuery = '&amp;filenext=' + filesAndDirs[l+1].substring(CURRENT_DIRECTORY.length + 1);
+                filenextQuery += '&amp;filenext=' + filesAndDirs[l+1].substring(CURRENT_DIRECTORY.length + 1);
+            }
+            var target = 'main';
+            if(query5.categorize) {
+                target = '_top';
+                filenextQuery += '&amp;categorize=true';
             }
             htmlFilelist += '<span style="white-space:nowrap;">' +
-                '- <a href="/fileview?file=' + filenameForLink + filenextQuery + '" target="main"'+autoclick+' onClick="this.className=\'clicked\'">' + filenameForLink + '</a></span><br />';
+                '- <a href="/fileview?file=' + filenameForLink + filenextQuery + '" target="' + target + '"'+autoclick+' onClick="this.className=\'clicked\'">' + filenameForLink + '</a></span><br />';
         }
         if(fileview2) {
             htmlFilelist += '<script>document.getElementById("autoclick").click();</script>'
@@ -426,10 +541,24 @@ http.createServer(function(request, response) {
         response.end();
     }
 
+    else if (uri.startsWith('/account_transactions_api/')) {
+        // -> Proxy the request.
+        http.get('http://localhost:13080' + uri, res => {
+            res.setEncoding("utf8");
+            let body = "";
+            res.on("data", data => {
+                body += data;
+            });
+            res.on("end", () => {
+                  response.writeHead(200, {'Content-Type': 'application/json'});
+                  response.write(body);
+                  response.end();
+            });
+        });
+    }
+
     else {
-
         fileExistsOr404(filename, function() {
-
             fs.readFile(filename, "binary", function(err, file) {
                 if (err) {
                     console.log('-- 500');
