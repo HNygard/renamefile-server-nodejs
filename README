@@ -1,3 +1,9 @@
+Throw together Javascript code to just get the job done.
+
+Two modes:
+- Rename with one input field
+- JSON Creator ("Categorizer") that have buttons for accounting, payment type, etc
+
 Install node packages:
     npm install
 
@@ -6,8 +12,3 @@ Make the app accessible from command line:
 
 Go into any directory in your terminal and start the app:
     renamefile-server
-
-TODO:
-- Refresh / new file after renaming
-- Image viewer - Zoom and pan (maybe https://github.com/benlumley/jQuery-PanZoom)
-- Images can be moved into folders when renaming (categories)
