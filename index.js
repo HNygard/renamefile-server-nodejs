@@ -430,11 +430,17 @@ http.createServer(function(request, response) {
                         jsonObj.currency = currency;
                         jsonObj.comment = response.post.data_comment;
 			jsonObj.transactions = [];
-			jsonObj.transactions.push({
-				"amount": response.post.data_amount,
-				"currency": currency,
-				"comment": response.post.data_comment
-			});
+
+                        var objTransaction = {
+                            "amount": response.post.data_amount,
+                            "currency": currency,
+                            "comment": response.post.data_comment,
+                            "accounting_subject": response.post.data_accounting_subject
+                        };
+                        if (response.post.data_accounting_post) {
+                            objTransaction.accounting_post = response.post.data_accounting_post;
+                        }
+                        jsonObj.transactions.push(objTransaction);
                         var json_file = path.join(CURRENT_DIRECTORY, filename_new + '.json');
                         var jsonString = JSON.stringify(jsonObj, null, 4);
                         console.log('-- Writing to JSON file [' + json_file + '].');
