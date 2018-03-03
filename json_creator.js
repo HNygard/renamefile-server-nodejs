@@ -17,6 +17,7 @@ $(function() {
 	var selected_transaction_id;
 	var selected_accounting_subject;
 	var selected_accounting_post;
+	var selected_split_items;
 	var comment;
 
 	var accountTransactionPromise; 
@@ -254,16 +255,17 @@ $(function() {
 	}
 	function htmlAccountingPost() {
 		var html_accounting_post = htmlStatus();
-		var button = function(text, data_post) {
+		var button = function(text, data_post, btn_class) {
 			return '<div class="col-12" style="padding-top: 5px; padding-bottom: 5px;">' +
 				'<button data-post="' + data_post + '"' +
-					' class="btn btn-default accounting_post"' +
+					' class="' + btn_class + '"' +
 					' style="width: 100%">' +
 					text +
 				'</button>' +
 				'</div>';
 		}
-		html_accounting_post += button('No accunting post', '', 'btn btn-dark accounting-post');
+		html_accounting_post += button('No accounting post', '', 'btn btn-dark accounting_post');
+		html_accounting_post += button('Split amount', 'SPLIT', 'btn btn-dark accounting_post_split');
 		for (var j = 0; j < selected_source.accounting_posts.length; j++) {
 			html_accounting_post += button(
 				selected_source.accounting_posts[j].account_number + ' - ' + (selected_source.accounting_posts[j].name),
@@ -271,6 +273,26 @@ $(function() {
 				'btn btn-default accounting_post'
 			);
 		}
+		return '<div class="container-fluid"><div class="row">' + html_accounting_post + '</div></div>';
+	}
+	function htmlAccountPostSplit() {
+		var html_accounting_post = htmlStatus();
+		var button = function(text, data_post, btn_class) {
+			return '<div class="col-1" style="padding-top: 5px; padding-bottom: 5px;">' +
+				'<button data-post="' + data_post + '"' +
+					' class="' + btn_class + '"' +
+					' style="width: 100%">' +
+					text +
+				'</button>' +
+				'</div>';
+		}
+		html_accounting_post += '<div id="accounting_post_split_items" class="col-12"></div>';
+		html_accounting_post += button('+', '', 'btn btn-primary accounting_post_split_add_item');
+		html_accounting_post += '<div class="col-10" style=" text-align: right;">';
+		html_accounting_post += 'Eks MVA: <span id="accounting_post_split_ex_vat" style="font-weight: bold;"></span>';
+		html_accounting_post += ', MVA: <span id="accounting_post_split_vat" style="font-weight: bold;"></span>';
+		html_accounting_post += ', ink MVA: <span id="accounting_post_split_inc_vat" style="font-weight: bold;"></span></div>';
+		html_accounting_post += button('Next', '', 'btn btn-primary accounting_post_split_finish');
 		return '<div class="container-fluid"><div class="row">' + html_accounting_post + '</div></div>';
 	}
 	function htmlComment() {
@@ -302,6 +324,18 @@ $(function() {
 		        html_form_submit += '<input name="data_invoice_date_month" value="' + selected_invoice_date_month + '" style="width: 30%;">';
 		        html_form_submit += '<input name="data_invoice_date_day" value="' + selected_invoice_date_day + '" style="width: 30%;"><br>';
 		}
+		if (selected_split_items) {
+			for (var i = 0; i < selected_split_items.length; i++) {
+				html_form_submit += i + ' -- ';
+				html_form_submit += '<input name="amount[]" value="' + selected_split_items[i].amount + '" style="10%">';
+				html_form_submit += '<input name="amount_includes_vat[]" value="' + (selected_split_items[i].amount_includes_vat ? 'true' : 'false') + '" style="10%">';
+				html_form_submit += '<input name="vat_rate[]" value="' + selected_split_items[i].vat_rate + '" style="10%">';
+				html_form_submit += '<input name="accounting_post[]" value="' + selected_split_items[i].accounting_post + '" style="10%">';
+				html_form_submit += '<input name="accounting_subject[]" value="' + selected_split_items[i].accounting_subject + '" style="20%">';
+				html_form_submit += '<input name="comment[]" value="' + selected_split_items[i].comment + '" style="30%">';
+				html_form_submit += '<br>';
+			}
+		}
                 html_form_submit += '<input id="filename_submit" style="width: 100%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
                 html_form_submit += '</form>';;
 		return '<div class="container-fluid"><div class="row">' + html_form_submit + '</div></div>';
@@ -327,8 +361,9 @@ $(function() {
 	//                         \/                 \/
 	//                      [ ----- accounting post ----- ]
 	//                                ||
-	//                                \/
-	//                      [ ----- comment ------------- ]
+	//                                ||-->  SPLIT => loop: [amount+comment+MVA]
+	//                                \/                          ||
+	//                      [ ----- comment ------------- ]     <=/
 
 	function updateBindings() {
 		$('.status-row', creator).click(reset);
@@ -351,6 +386,9 @@ $(function() {
 		$('button.invoice_date_day_selector', creator).click(onclickInvoiceDueDateDay);
 
 		$('button.accounting_post', creator).click(onclickAccountingPost);
+		$('button.accounting_post_split', creator).click(onclickAccountingPostSplit);
+		$('button.accounting_post_split_add_item', creator).click(onclickAccountingPostSplitAddItem);
+		$('button.accounting_post_split_finish', creator).click(onclickAccountingPostSplitNext);
 
 		$('#comment_input', creator).change(onchangeComment);
 		$('#comment_input', creator).keypress(onchangeComment);
@@ -515,16 +553,111 @@ $(function() {
 		selected_transaction_id = $(this).data('transaction-id');
 		updateHtml(htmlAccountingPost());
 	}
-	// 8 - Comment
+	function onclickAccountingPostSplit() {
+		// -> Go into split mode
+		updateHtml(htmlAccountPostSplit());
+		onclickAccountingPostSplitAddItem();
+	}
+	// 8 - Optional accounting post split
+	function onclickAccountingPostSplitAddItem() {
+		var randomId = '' + (new Date()).getTime() + parseInt(1000 * Math.random());
+		$('#accounting_post_split_items').append(
+			'<div class="col-12 split-items" id="item_' + randomId + '">' +
+			'<input type="text" class="amount" placeholder="Amount" name="amount_' + randomId + '" data-id="' + randomId + ' style="width: 100px;">' +
+			'<label style="padding-left: 5px; padding-right: 5px;"><input type="checkbox" value="amount_is_including_vat" name="ink_mva_' + randomId + '" checked="checked" class="inc_vat">Ink MVA</label>' +
+			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.25" name="vat_' + randomId + '" class="vat"> 25% VAT</label>' +
+			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.15" name="vat_' + randomId + '" class="vat"> 15% VAT</label>' +
+			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.10" name="vat_' + randomId + '" class="vat"> 10% VAT</label>' +
+			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0" name="vat_' + randomId + '" class="vat"> 0% VAT</label>' +
+			'<input type="text" placeholder="Post" name="accounting_post_' + randomId + '" class="accounting_post_split_input" style="width: 100px;">' +
+			'<input type="text" placeholder="Subject" name="accounting_subject_' + randomId + '" class="accounting_subject_split_input" style="width: 100px;">' +
+			'<input type="text" placeholder="Comment" name="comment_' + randomId + '" class="comment_split_input" style="width: 400px;">' +
+			'<span style="padding-left: 15px;">' +
+			'Eks MVA.: <span style="padding-right: 15px; font-weight: bold;" class="amount_ex_vat"></span>' +
+			'MVA.:     <span style="padding-right: 15px; font-weight: bold;" class="amount_vat"></span>' +
+			'Ink MVA.: <span style="padding-right: 15px; font-weight: bold;" class="amount_inc_vat"></span>' +
+			'</span>' +
+			'</div>'
+		);
+		var item = $('#item_' + randomId);
+		var onChangeItem = function() {
+			var amount = parseFloat($('.amount', item).val().replace('.', '').replace(/\s/g, '').replace(',', '.'));
+			var incVat = $('.inc_vat', item).prop('checked');
+			var currentVat = parseFloat($('.vat:checked', item).val() || 0);
+
+			var amount_ex_vat;
+			var amount_vat;
+			var amount_inc_vat;			
+			if (incVat) {
+				amount_inc_vat = amount;
+				amount_ex_vat = amount / (1 + currentVat);
+			}
+			else {
+				amount_ex_vat = amount;
+				amount_inc_vat = amount * (1 + currentVat);
+			}
+			amount_ex_vat = (new Number(parseInt(amount_ex_vat * 100) / 100));
+			amount_inc_vat = (new Number(parseInt(amount_inc_vat * 100) / 100));
+			amount_vat = amount_inc_vat - amount_ex_vat;
+			console.log(amount, incVat, currentVat);
+			console.log(amount_ex_vat, amount_vat, amount_inc_vat);
+			$('.amount_ex_vat ', item).text(amount_ex_vat.toLocaleString('nb-NO'));
+			$('.amount_vat    ', item).text((new Number(parseInt(amount_vat * 100) / 100)).toLocaleString('nb-NO'));
+			$('.amount_inc_vat', item).text(amount_inc_vat.toLocaleString('nb-NO'));
+
+			var total_amount_ex_vat = 0;
+			var total_amount_vat = 0;
+			var total_amount_inc_vat = 0;
+			$('.amount_ex_vat').each(function() {
+				total_amount_ex_vat += parseFloat($(this).text().replace(',', '.').replace(/\s/g, ''));
+			});
+			$('.amount_vat').each(function() {
+				total_amount_vat += parseFloat($(this).text().replace(',', '.').replace(/\s/g, ''));
+			});
+			$('.amount_inc_vat').each(function() {
+				total_amount_inc_vat += parseFloat($(this).text().replace(',', '.').replace(/\s/g, ''));
+			});
+			$('#accounting_post_split_ex_vat ').text(total_amount_ex_vat.toLocaleString('nb-NO'));
+			$('#accounting_post_split_vat    ').text(total_amount_vat.toLocaleString('nb-NO'));
+			$('#accounting_post_split_inc_vat').text(total_amount_inc_vat.toLocaleString('nb-NO'));
+			
+			if (new Number(selected_amount.replace(',', '.').replace(/\s/g, '')).toLocaleString('nb-NO') == total_amount_inc_vat.toLocaleString('nb-NO')) {
+				$('#accounting_post_split_inc_vat').css('color', 'green');
+			}
+			else {
+				$('#accounting_post_split_inc_vat').css('color', 'red');
+			}
+		}
+		var itemInputs = $('input', item);
+		itemInputs.change(onChangeItem);
+		itemInputs.keypress(onChangeItem);
+		itemInputs.keyup(onChangeItem);
+	}
+	// 9 - Comment
 	function onclickAccountingPost() {
 		selected_accounting_post = $(this).data('post');
+		updateHtml(htmlComment());
+	}
+	function onclickAccountingPostSplitNext() {
+		var items = [];
+		$('.split-items').each(function() {
+			items.push({
+				'amount': $('.amount', this).val(),
+				'amount_includes_vat': $('.inc_vat', this).prop('checked'),
+				'vat_rate': $('.vat:checked', this).val(),
+				'accounting_post': $('.accounting_post_split_input', this).val(),
+				'accounting_subject': $('.accounting_subject_split_input', this).val(),
+				'comment': $('.comment_split_input', this).val()
+			});
+		});
+		selected_split_items = items;
 		updateHtml(htmlComment());
 	}
 	function onchangeComment() {
 		comment = $(this).val();
 		$('#status-wrapper').html(htmlStatusInner());
 	}
-	// 9 - Submit form
+	// 10 - Submit form
 	function onclickCommentNext() {
 		comment = $('#comment_input').val();
 		updateHtml(htmlFormSubmit());

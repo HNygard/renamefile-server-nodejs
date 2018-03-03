@@ -431,16 +431,35 @@ http.createServer(function(request, response) {
                         jsonObj.comment = response.post.data_comment;
 			jsonObj.transactions = [];
 
-                        var objTransaction = {
-                            "amount": response.post.data_amount,
-                            "currency": currency,
-                            "comment": response.post.data_comment,
-                            "accounting_subject": response.post.data_accounting_subject
-                        };
-                        if (response.post.data_accounting_post) {
-                            objTransaction.accounting_post = response.post.data_accounting_post;
-                        }
-                        jsonObj.transactions.push(objTransaction);
+                        if (response.post['amount[]'] && response.post['amount[]'].length > 0) {
+			    // -> Amount split in progress.
+			    for (var k = 0; k < response.post['amount[]'].length; k++) {
+				        var objTransaction = {
+				            "amount": response.post['amount[]'][k],
+				            "currency": currency,
+				            "amount_includes_vat": (response.post['amount_includes_vat[]'][k] === 'true'),
+				            "vat_rate": response.post['vat_rate[]'][k],
+				            "comment": response.post['comment[]'][k],
+				            "accounting_subject": response.post['accounting_subject[]'][k],
+				            "accounting_post": response.post['accounting_post[]'][k]
+				        };
+				        jsonObj.transactions.push(objTransaction);
+				}
+			}
+			else {
+			    // -> No split. Create a transaction
+		                var objTransaction = {
+		                    "amount": response.post.data_amount,
+		                    "currency": currency,
+		                    "comment": response.post.data_comment,
+		                    "accounting_subject": response.post.data_accounting_subject
+		                };
+		                if (response.post.data_accounting_post) {
+		                    objTransaction.accounting_post = response.post.data_accounting_post;
+		                }
+		                jsonObj.transactions.push(objTransaction);
+			}
+
                         var json_file = path.join(CURRENT_DIRECTORY, filename_new + '.json');
                         var jsonString = JSON.stringify(jsonObj, null, 4);
                         console.log('-- Writing to JSON file [' + json_file + '].');
