@@ -569,8 +569,8 @@ $(function() {
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.15" name="vat_' + randomId + '" class="vat"> 15% VAT</label>' +
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.10" name="vat_' + randomId + '" class="vat"> 10% VAT</label>' +
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0" name="vat_' + randomId + '" class="vat"> 0% VAT</label>' +
-			'<input type="text" placeholder="Post" name="accounting_post_' + randomId + '" class="accounting_post_split_input" style="width: 100px;">' +
 			'<input type="text" placeholder="Subject" name="accounting_subject_' + randomId + '" class="accounting_subject_split_input" style="width: 100px;">' +
+			'<input type="text" placeholder="Post" name="accounting_post_' + randomId + '" class="accounting_post_split_input" style="width: 100px;">' +
 			'<input type="text" placeholder="Comment" name="comment_' + randomId + '" class="comment_split_input" style="width: 400px;">' +
 			'<span style="padding-left: 15px;">' +
 			'Eks MVA.: <span style="padding-right: 15px; font-weight: bold;" class="amount_ex_vat"></span>' +
@@ -632,6 +632,34 @@ $(function() {
 		itemInputs.change(onChangeItem);
 		itemInputs.keypress(onChangeItem);
 		itemInputs.keyup(onChangeItem);
+
+		var $input = $('input.accounting_subject_split_input', item);
+		$input.typeahead({
+			source: sources,
+			updater: function(item) { return item.folder; }
+		});
+		$input.change(function() {
+			var current_subject = $(this).val();
+			var post_list;
+			for(var p = 0; p < sources.length; p++) {
+				if (current_subject == sources[p].folder) {
+					// -> The right subject. Lets create a customized source list for typeahead.
+					post_list = [];
+					for (var t = 0; t < sources[p].accounting_posts.length; t++) {
+						post_list.push({
+							'account_number': sources[p].accounting_posts[t].account_number,
+							'name': sources[p].accounting_posts[t].account_number + ': ' + sources[p].accounting_posts[t].name,
+						});
+					}
+				}
+			}
+			var accounting_post_element = $('input.accounting_post_split_input', item);
+			accounting_post_element.typeahead('destroy');
+			accounting_post_element.typeahead({
+				source: post_list,
+				updater: function(item) { return item.account_number; }
+			});
+		});
 	}
 	// 9 - Comment
 	function onclickAccountingPost() {

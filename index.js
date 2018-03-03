@@ -41,6 +41,9 @@ http.createServer(function(request, response) {
     if (uri === '/bootstrap.min.js.map') {
         filename = getLocalFile('node_modules/bootstrap/dist/js/bootstrap.min.js.map');
     }
+    if (uri === '/bootstrap3-typeahead.js') {
+        filename = getLocalFile('node_modules/bootstrap-3-typeahead/bootstrap3-typeahead.js');
+    }
     if (uri === '/json_creator.js') {
         filename = getLocalFile('json_creator.js');
     }
@@ -503,7 +506,27 @@ http.createServer(function(request, response) {
                     '<script src="jquery.min.js"></script>' +
                     '<script src="json_creator.js"></script>' +
                     '<script src="bootstrap.min.js"></script>' +
+                    '<script src="bootstrap3-typeahead.js"></script>' +
                     '<link href="bootstrap.min.css" rel="stylesheet">' +
+                    '<style>' +
+                    // The typeahead does not seem to work. Not showing active item.
+                    '.typeahead.dropdown-menu li:hover .dropdown-item, .typeahead.dropdown-menu li:focus .dropdown-item {' +
+                    '  color: #16181b;' +
+                    '  text-decoration: none;' +
+                    '  background-color: #f8f9fa;' +
+                    '}' +
+                    '' +
+                    '.typeahead.dropdown-menu li.active .dropdown-item, .typeahead.dropdown-menu li:active .dropdown-item {' +
+                    '  color: #fff;' +
+                    '  text-decoration: none;' +
+                    '  background-color: #007bff;' +
+                    '}' +
+                    '' +
+                    '.typeahead.dropdown-menu li.disabled .dropdown-item, .typeahead.dropdown-menu li:disabled .dropdown-item {' +
+                    '  color: #6c757d;' +
+                    '  background-color: transparent;' +
+                    '}' +
+                    '    </style>' +
                     '    </head>';
                 htmlFilerename += '<body style="background-color: lightgray;">';
                 htmlFilerename += '<div id="main_form">';
