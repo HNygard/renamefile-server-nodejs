@@ -155,7 +155,7 @@ http.createServer(function(request, response) {
             '    <head>' +
             '        <meta charset="utf-8"/>' +
             '    </head>' +
-            '    <frameset framespacing="0" cols="150,*" frameborder="0" noresize>' +
+            '    <frameset framespacing="0" cols="300,*" frameborder="0" noresize>' +
             '        <frame name="top" src="/filelist?fileview='+ fileview + filenextqueryPart + '" target="top">' +
             '        <frame name="main" src="/fileoverview_with_rename" target="main">' +
             '    </frameset>' +
