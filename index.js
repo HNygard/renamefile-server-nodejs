@@ -434,8 +434,10 @@ http.createServer(function(request, response) {
                         jsonObj.comment = response.post.data_comment;
 			jsonObj.transactions = [];
 
-                        if (response.post['amount[]'] && response.post['amount[]'].length > 0) {
-			    // -> Amount split in progress.
+                        if (response.post['amount[]']
+				&& response.post['amount[]'] instanceof Array
+				&& response.post['amount[]'].length > 0) {
+			    // -> Amount split in progress. Multiple items
 			    for (var k = 0; k < response.post['amount[]'].length; k++) {
 				        var objTransaction = {
 				            "amount": response.post['amount[]'][k],
@@ -448,6 +450,20 @@ http.createServer(function(request, response) {
 				        };
 				        jsonObj.transactions.push(objTransaction);
 				}
+			}
+			else if (response.post['amount[]']
+				&& response.post['amount[]'].length > 0) {
+				// -> Amount split in progress. 1 item
+				var objTransaction = {
+				    "amount": response.post['amount[]'],
+				    "currency": currency,
+				    "amount_includes_vat": (response.post['amount_includes_vat[]'] === 'true'),
+				    "vat_rate": response.post['vat_rate[]'],
+				    "comment": response.post['comment[]'],
+				    "accounting_subject": response.post['accounting_subject[]'],
+				    "accounting_post": response.post['accounting_post[]']
+				};
+				jsonObj.transactions.push(objTransaction);
 			}
 			else {
 			    // -> No split. Create a transaction
