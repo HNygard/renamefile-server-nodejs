@@ -30,6 +30,14 @@ $(function() {
 		})
 		.then(function(data) {
 			sources = data.sources;
+			for(var i = 0; i < sources.length; i++) {
+				if (sources[i].accounting_posts_key) {
+					sources[i].accounting_posts = data[sources[i].accounting_posts_key];
+				}
+				if (sources[i].accounts_key) {
+					sources[i].accounts = data[sources[i].accounts_key];
+				}
+			}
 			reset();
 		});
 	function setSelectedSource() {
