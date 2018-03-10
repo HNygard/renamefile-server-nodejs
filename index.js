@@ -353,7 +353,23 @@ http.createServer(function(request, response) {
                 '        <script src="hammer.min.js"></script>' +
                 '    </head>';
             htmlFilerename += '<body style="background-color: lightgray;">';
-            htmlFilerename += '<div class="pinch-zoom-container"><img id="pinch-zoom-image-id" src="' + query3.file + '" style="width: 100%"  class="pinch-zoom-image" onload="onLoad()"><br>';
+
+            htmlFilerename += '<a href="/" style="width: 10%; position: fixed; top: 0; left: 0;border: 1px solid red;opacity: 0.6;" target="_top">MAIN PAGE</a>';
+            htmlFilerename += '<a href="/?categorize=true" style="width: 10%; position: fixed; top: 0; left: 10%;border: 1px solid red;opacity: 0.6;" target="_top">CATEGORIZER</a>';
+
+            var file_to_view = query3.file;
+            if (fs.lstatSync(query3.file).isDirectory()) {
+                var dir_to_view = getFileListForDirectory(query3.file);
+                for (var file_num = 0; file_num < dir_to_view.length; file_num++) {
+                    if (file_to_view === query3.file) {
+                        file_to_view = dir_to_view[file_num];
+                    }
+                    htmlFilerename += '<div style="background-color: gray; color: white; padding: 15px; margin-right: 15px; display: inline-block;"' +
+                        ' onclick="document.getElementById(\'pinch-zoom-image-id\').src = \'' + dir_to_view[file_num] + '\';"' +
+                        '>' + dir_to_view[file_num].replace(query3.file + '/', '') + '</div>';
+                }
+            }
+            htmlFilerename += '<div class="pinch-zoom-container"><img id="pinch-zoom-image-id" src="' + file_to_view + '" style="width: 100%"  class="pinch-zoom-image" onload="onLoad()"><br>';
             //htmlFilerename += '<img src="' + query3.file + '" style="width: 100%" id="main_image"><br>';
             if (query3.filenext) {
                 htmlFilerename += '<img src="' + query3.filenext + '" style="width: 20%; position: fixed; top: 0; right: 0;border: 1px solid red;opacity: 0.6;"><br>';
@@ -386,6 +402,7 @@ http.createServer(function(request, response) {
             if (request.method === 'POST') {
                 handlePost(function() {
                     var filename_new;
+                    var directory_name_new;
                     if(response.post.data_year) {
                         // -> Mobile categorizer
                         // Folders
@@ -412,6 +429,7 @@ http.createServer(function(request, response) {
                         if (!fs.existsSync(doc_folder)) {
                             fs.mkdirSync(doc_folder);
                         }
+                        directory_name_new = doc_folder;
                         filename_new = filename_new + '/' + the_filename;
 
                         var jsonObj = {};
@@ -487,6 +505,7 @@ http.createServer(function(request, response) {
                     }
                     else {
                         filename_new = response.post.filename_new;
+                        directory_name_new = path.join(CURRENT_DIRECTORY, filename_new.replace(/\\/g, ''));
                     }
                     filename_new = filename_new + path.extname(query.file);
                     filename_new = filename_new.replace(/\\/g, ''); // Remove slashes
@@ -495,7 +514,19 @@ http.createServer(function(request, response) {
                     console.log('-- NEW FILENAME: ' + filename_new);
                     console.log('-- -- New - full path: ' + filename_new_with_path);
                     console.log('-- -- Old - full path: ' + filename_old_with_path);
-                    fs.renameSync(filename_old_with_path, filename_new_with_path);
+                    if (fs.lstatSync(filename_old_with_path).isDirectory()) {
+                        if (!fs.existsSync(directory_name_new)) {
+                            fs.mkdirSync(directory_name_new);
+                        }
+                        var files_in_dir = getFileListForDirectory(filename_old_with_path);
+                        for (var file_num = 0; file_num < files_in_dir.length; file_num++) {
+                            fs.renameSync(files_in_dir[file_num], directory_name_new + '/' + path.basename(files_in_dir[file_num]));
+                        }
+                        fs.rmdirSync(filename_old_with_path);
+                    }
+                    else {
+                        fs.renameSync(filename_old_with_path, filename_new_with_path);
+                    }
                     var html = '<!DOCTYPE html>' +
                         '<html>' +
                         '    <body>' +
