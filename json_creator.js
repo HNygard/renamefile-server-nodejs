@@ -395,7 +395,7 @@ $(function() {
 
 		$('button.accounting_post', creator).click(onclickAccountingPost);
 		$('button.accounting_post_split', creator).click(onclickAccountingPostSplit);
-		$('button.accounting_post_split_add_item', creator).click(onclickAccountingPostSplitAddItem);
+		$('button.accounting_post_split_add_item', creator).click(function() { onclickAccountingPostSplitAddItem('', '', ''); });
 		$('button.accounting_post_split_finish', creator).click(onclickAccountingPostSplitNext);
 
 		$('#comment_input', creator).change(onchangeComment);
@@ -564,22 +564,22 @@ $(function() {
 	function onclickAccountingPostSplit() {
 		// -> Go into split mode
 		updateHtml(htmlAccountPostSplit());
-		onclickAccountingPostSplitAddItem();
+		onclickAccountingPostSplitAddItem(selected_amount, selected_accounting_subject, comment);
 	}
 	// 8 - Optional accounting post split
-	function onclickAccountingPostSplitAddItem() {
+	function onclickAccountingPostSplitAddItem(amount, subject_folder, comment) {
 		var randomId = '' + (new Date()).getTime() + parseInt(1000 * Math.random());
 		$('#accounting_post_split_items').append(
 			'<div class="col-12 split-items" id="item_' + randomId + '">' +
-			'<input type="text" class="amount" placeholder="Amount" name="amount_' + randomId + '" data-id="' + randomId + ' style="width: 100px;">' +
+			'<input type="text" class="amount" placeholder="Amount" name="amount_' + randomId + '" data-id="' + randomId + ' style="width: 100px;" value="' + amount + '">' +
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="checkbox" value="amount_is_including_vat" name="ink_mva_' + randomId + '" checked="checked" class="inc_vat">Ink MVA</label>' +
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.25" name="vat_' + randomId + '" class="vat"> 25% VAT</label>' +
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.15" name="vat_' + randomId + '" class="vat"> 15% VAT</label>' +
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.10" name="vat_' + randomId + '" class="vat"> 10% VAT</label>' +
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0" name="vat_' + randomId + '" class="vat"> 0% VAT</label>' +
-			'<input type="text" placeholder="Subject" name="accounting_subject_' + randomId + '" class="accounting_subject_split_input" style="width: 100px;">' +
+			'<input type="text" placeholder="Subject" name="accounting_subject_' + randomId + '" class="accounting_subject_split_input" style="width: 100px;" value="' + subject_folder + '">' +
 			'<input type="text" placeholder="Post" name="accounting_post_' + randomId + '" class="accounting_post_split_input" style="width: 100px;">' +
-			'<input type="text" placeholder="Comment" name="comment_' + randomId + '" class="comment_split_input" style="width: 400px;">' +
+			'<input type="text" placeholder="Comment" name="comment_' + randomId + '" class="comment_split_input" style="width: 400px;" value="' + comment + '">' +
 			'<span style="padding-left: 15px;">' +
 			'Eks MVA.: <span style="padding-right: 15px; font-weight: bold;" class="amount_ex_vat"></span>' +
 			'MVA.:     <span style="padding-right: 15px; font-weight: bold;" class="amount_vat"></span>' +
@@ -640,14 +640,15 @@ $(function() {
 		itemInputs.change(onChangeItem);
 		itemInputs.keypress(onChangeItem);
 		itemInputs.keyup(onChangeItem);
+		onChangeItem();
 
 		var $input = $('input.accounting_subject_split_input', item);
 		$input.typeahead({
 			source: sources,
 			updater: function(item) { return item.folder; }
 		});
-		$input.change(function() {
-			var current_subject = $(this).val();
+		var subjectTypeaheadChange = function() {
+			var current_subject = $input.val();
 			var post_list;
 			for(var p = 0; p < sources.length; p++) {
 				if (current_subject == sources[p].folder) {
@@ -667,7 +668,9 @@ $(function() {
 				source: post_list,
 				updater: function(item) { return item.account_number; }
 			});
-		});
+		};
+		$input.change(subjectTypeaheadChange);
+		subjectTypeaheadChange();
 	}
 	// 9 - Comment
 	function onclickAccountingPost() {
