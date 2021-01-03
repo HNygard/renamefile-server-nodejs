@@ -319,7 +319,7 @@ http.createServer(function(request, response) {
 
         fileExistsOr404(query2.file, function() {
             var fileviewimg = '/fileviewimg?file=' + query2.file + filenextqueryPart;
-            if (query2.file.endsWith('.PDF') || query2.file.endsWith('.pdf')) {
+            if (query2.file.endsWith('.PDF') || query2.file.endsWith('.pdf') ||  query2.file.endsWith('.json') ||  query2.file.endsWith('.txt')) {
                 // -> A PDF. Lets use Chrome PDF viewer.
                 fileviewimg = query2.file;
             }
@@ -357,6 +357,24 @@ http.createServer(function(request, response) {
             htmlFilerename += '<a href="/" style="width: 10%; position: fixed; top: 0; left: 0;border: 1px solid red;opacity: 0.6;" target="_top">MAIN PAGE</a>';
             htmlFilerename += '<a href="/?categorize=true" style="width: 10%; position: fixed; top: 0; left: 10%;border: 1px solid red;opacity: 0.6;" target="_top">CATEGORIZER</a>';
 
+            htmlFilerename += '<script>' +
+                'function setImageOrPdfOrText(filename) {' +
+                '    console.log("Opening [" + filename + "]");' +
+                '    if (filename.endsWith(".pdf") || filename.endsWith(".PDF") || filename.endsWith(".json") || filename.endsWith(".txt")) {' +
+                '    ' +
+                '        document.getElementById(\'pinch-zoom-image-id\').src = "";' +
+                '        document.getElementById(\'pinch-zoom-image-id\').style.display = "none";' +
+                '        document.getElementById(\'directory_fileviewer\').src = filename;' +
+                '        document.getElementById(\'directory_fileviewer\').style.display = "block";' +
+                '    }' +
+                '    else {' +
+                '        document.getElementById(\'pinch-zoom-image-id\').src = filename;' +
+                '        document.getElementById(\'pinch-zoom-image-id\').style.display = "block";' +
+                '        document.getElementById(\'directory_fileviewer\').src = "";' +
+                '        document.getElementById(\'directory_fileviewer\').style.display = "none";' +
+                '    }' +
+		'}' +
+                '</script>';
             var file_to_view = query3.file;
             if (fs.lstatSync(query3.file).isDirectory()) {
                 var dir_to_view = getFileListForDirectory(query3.file);
@@ -365,11 +383,12 @@ http.createServer(function(request, response) {
                         file_to_view = dir_to_view[file_num];
                     }
                     htmlFilerename += '<div style="background-color: gray; color: white; padding: 15px; margin-right: 15px; display: inline-block;"' +
-                        ' onclick="document.getElementById(\'pinch-zoom-image-id\').src = \'' + dir_to_view[file_num] + '\';"' +
+                        ' onclick="setImageOrPdfOrText(\'' + dir_to_view[file_num] + '\');"' +
                         '>' + dir_to_view[file_num].replace(query3.file + '/', '') + '</div>';
                 }
             }
-            htmlFilerename += '<div class="pinch-zoom-container"><img id="pinch-zoom-image-id" src="' + file_to_view + '" style="width: 100%"  class="pinch-zoom-image" onload="onLoad()"><br>';
+            htmlFilerename += '<div class="pinch-zoom-container"><img id="pinch-zoom-image-id" style="width: 100%"  class="pinch-zoom-image" onload="onLoad()"></div>';
+            htmlFilerename += '<iframe style="width: 100%; min-height: 700px" id="directory_fileviewer"></iframe><br>';
             //htmlFilerename += '<img src="' + query3.file + '" style="width: 100%" id="main_image"><br>';
             if (query3.filenext) {
                 htmlFilerename += '<img src="' + query3.filenext + '" style="width: 20%; position: fixed; top: 0; right: 0;border: 1px solid red;opacity: 0.6;"><br>';
@@ -384,6 +403,9 @@ http.createServer(function(request, response) {
                 '    console.log(ev.type);' +
                 '});' +
                 '' +
+                '</script>';
+            htmlFilerename += '<script>' +
+		'setImageOrPdfOrText("' + file_to_view + '");' +
                 '</script>';
             htmlFilerename += '</html>';
             response.writeHead(200, {"Content-Type": "text/html"});
