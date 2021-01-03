@@ -553,7 +553,7 @@ $(function() {
 		accountTransactionPromise
 			.then(function(data) { console.log(data); return data.json(); })
 			.then(function(data) {
-				accountTransaction = data;
+				accountTransaction = data.transactions;
 				updateHtml(htmlSelectTransaction());
 			});
 	}
