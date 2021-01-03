@@ -37,6 +37,9 @@ $(function() {
 				if (sources[i].accounts_key) {
 					sources[i].accounts = data[sources[i].accounts_key];
 				}
+				if (sources[i].card_accounts_key) {
+					sources[i].card_accounts = data[sources[i].card_accounts_key];
+				}
 			}
 			reset();
 		});
@@ -206,8 +209,8 @@ $(function() {
 		}
 		html_payment_type += button('Cash', 'CASH');
 		html_payment_type += button('Bank transfer', 'BANK_TRANSFER');
-		html_payment_type += button('Bank invoice', 'INVOICE');
 		html_payment_type += button('Card', 'CARD');
+		html_payment_type += button('Bank invoice', 'INVOICE');
 		return '<div class="container-fluid"><div class="row">' + html_payment_type + '</div></div>';
 	}
 	function htmlSelectTransaction() {
@@ -511,14 +514,18 @@ $(function() {
 			var selected_date_unixtime = (new Date(selected_year + '-' + selected_month + '-' + selected_day)).getTime() / 1000;
 			var unixtime_from = selected_date_unixtime - (60 * 60 * 24 * 10);
 			var unixtime_to = selected_date_unixtime + (60 * 60 * 24 * 10);
-			accountTransactionPromise = fetch('/account_transactions_api/' + selected_source.accounts.join(',') + '/' + unixtime_from + '/' + unixtime_to);
+			var bank_accounts = selected_source.accounts;
+			if (selected_payment_type === 'CARD') {
+				bank_accounts = selected_source.card_accounts;
+			}
+			accountTransactionPromise = fetch('/account_transactions_api/' + bank_accounts.join(',') + '/' + unixtime_from + '/' + unixtime_to);
 		}
 
 		if (selected_payment_type === 'INVOICE') {
 			startAccountTransactionPromise();
 			updateHtml(htmlYears('invoice_date_year_selector'));
 		}
-		else if (selected_payment_type === 'BANK_TRANSFER') {
+		else if (selected_payment_type === 'BANK_TRANSFER' || selected_payment_type === 'CARD') {
 			startAccountTransactionPromise();
 			updateWithSelectTransaction();
 		}
