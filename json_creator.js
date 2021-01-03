@@ -582,7 +582,7 @@ $(function() {
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="checkbox" value="amount_is_including_vat" name="ink_mva_' + randomId + '" checked="checked" class="inc_vat">Ink MVA</label>' +
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.25" name="vat_' + randomId + '" class="vat"> 25% VAT</label>' +
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.15" name="vat_' + randomId + '" class="vat"> 15% VAT</label>' +
-			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.10" name="vat_' + randomId + '" class="vat"> 10% VAT</label>' +
+			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.12" name="vat_' + randomId + '" class="vat"> 12% VAT</label>' +
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0" name="vat_' + randomId + '" class="vat"> 0% VAT</label>' +
 			'<input type="text" placeholder="Subject" name="accounting_subject_' + randomId + '" class="accounting_subject_split_input" style="width: 100px;" value="' + subject_folder + '">' +
 			'<input type="text" placeholder="Post" name="accounting_post_' + randomId + '" class="accounting_post_split_input" style="width: 100px;">' +
