@@ -697,4 +697,4 @@ http.createServer(function(request, response) {
 }).listen(parseInt(port, 10));
 
 console.log("Web server running at\n  => " + serverUrl + "/\nCTRL + C to shutdown");
-open(serverUrl);
+//open(serverUrl);
