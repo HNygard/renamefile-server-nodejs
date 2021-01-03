@@ -618,6 +618,20 @@ http.createServer(function(request, response) {
                     'elm.onchange = updateFunction; ' +
                     'updateFunction(); ' +
                     '</script>';
+
+		    if (fs.lstatSync(query.file).isDirectory()) {
+			console.log('Query is directory: ' + query.file);
+		        var dir_to_view = getFileListForDirectory(query.file);
+		        for (var file_num = 0; file_num < dir_to_view.length; file_num++) {
+			console.log('...: ' + dir_to_view[file_num]);
+				if(dir_to_view[file_num].endsWith('extracted_items.json')) {
+                htmlFilerename += '<script>' +
+                    'initJsonCreatorItems("' + dir_to_view[file_num] + '");' +
+                    '</script>';
+				}
+		        }
+		    }
+
                 htmlFilerename += '</html>';
                 response.writeHead(200, {"Content-Type": "text/html"});
                 response.write(htmlFilerename + "\n");

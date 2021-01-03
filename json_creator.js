@@ -1,3 +1,18 @@
+
+
+var itemsInFolder = [];
+function initJsonCreatorItems(filename) {
+	console.log("Init items from: " + filename);
+	// extracted_items.json
+	fetch(filename)
+	.then(function(data) {
+		return data.json();
+	})
+	.then(function(data) {
+		itemsInFolder = data.items;
+		console.log("Init items read: " + itemsInFolder.length, itemsInFolder);
+	});
+}
 $(function() {
 	if (!document.location.search.includes('categorize')) {
 		return;
@@ -571,7 +586,15 @@ $(function() {
 	function onclickAccountingPostSplit() {
 		// -> Go into split mode
 		updateHtml(htmlAccountPostSplit());
-		onclickAccountingPostSplitAddItem(selected_amount, selected_accounting_subject, comment);
+		if (!itemsInFolder) {
+			onclickAccountingPostSplitAddItem(selected_amount, selected_accounting_subject, comment);
+		}
+		else {
+			for (var i = 0; i < itemsInFolder.length; i++) {
+				var item = itemsInFolder[i];
+				onclickAccountingPostSplitAddItem(item.amount, item.accountingSubject, item.comment);
+			}
+		}
 	}
 	// 8 - Optional accounting post split
 	function onclickAccountingPostSplitAddItem(amount, subject_folder, comment) {
@@ -614,8 +637,6 @@ $(function() {
 			amount_ex_vat = (new Number(parseInt(amount_ex_vat * 100) / 100));
 			amount_inc_vat = (new Number(parseInt(amount_inc_vat * 100) / 100));
 			amount_vat = amount_inc_vat - amount_ex_vat;
-			console.log(amount, incVat, currentVat);
-			console.log(amount_ex_vat, amount_vat, amount_inc_vat);
 			$('.amount_ex_vat ', item).text(amount_ex_vat.toLocaleString('nb-NO'));
 			$('.amount_vat    ', item).text((new Number(parseInt(amount_vat * 100) / 100)).toLocaleString('nb-NO'));
 			$('.amount_inc_vat', item).text(amount_inc_vat.toLocaleString('nb-NO'));
