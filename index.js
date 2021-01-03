@@ -581,7 +581,8 @@ http.createServer(function(request, response) {
                 htmlFilerename += '<input name="filename_new" id="filename_new" style="width: 90%" autofocus>';
                 htmlFilerename += '<input id="filename_submit" style="width: 10%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
                 htmlFilerename += '</form>';
-                htmlFilerename += 'Previous name: ' + query.file + '<br>';
+                htmlFilerename += 'Previous name: <span id="filename_old_display" ' +
+                    'onclick="document.getElementById(\'filename_new\').value=\''+ path.basename(query.file, path.extname(query.file)) + '\';">' + query.file + '</span><br>';
                 htmlFilerename += 'New name: <span id="filename_new_display"></span>' + path.extname(query.file) + '<br>';
                 htmlFilerename += '</div>';
                 htmlFilerename += '<div id="json_creator"></div>';
