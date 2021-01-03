@@ -321,6 +321,7 @@ $(function() {
 	function htmlFormSubmit() {
 		var html_form_submit = htmlStatus();
                 html_form_submit += '<form method="POST">';
+                html_form_submit += '<input id="filename_submit" style="width: 100%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
                 html_form_submit += '<input name="data_year" value="' + selected_year + '" style="width: 40%;">';
                 html_form_submit += '<input name="data_month" value="' + selected_month + '" style="width: 30%;">';
                 html_form_submit += '<input name="data_day" value="' + selected_day + '" style="width: 30%;"><br>';
@@ -347,8 +348,7 @@ $(function() {
 				html_form_submit += '<br>';
 			}
 		}
-                html_form_submit += '<input id="filename_submit" style="width: 100%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
-                html_form_submit += '</form>';;
+                html_form_submit += '</form>';
 		return '<div class="container-fluid"><div class="row">' + html_form_submit + '</div></div>';
 	}
 	function updateHtml(html) {
