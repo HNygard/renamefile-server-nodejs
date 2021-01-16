@@ -586,18 +586,18 @@ $(function() {
 	function onclickAccountingPostSplit() {
 		// -> Go into split mode
 		updateHtml(htmlAccountPostSplit());
-		if (!itemsInFolder) {
-			onclickAccountingPostSplitAddItem(selected_amount, selected_accounting_subject, comment);
+		if (!itemsInFolder.length) {
+			onclickAccountingPostSplitAddItem(selected_amount, selected_accounting_subject, comment, '');
 		}
 		else {
 			for (var i = 0; i < itemsInFolder.length; i++) {
 				var item = itemsInFolder[i];
-				onclickAccountingPostSplitAddItem(item.amount, item.accountingSubject, item.comment);
+				onclickAccountingPostSplitAddItem(item.amount, item.accountingSubject, item.comment, item.post);
 			}
 		}
 	}
 	// 8 - Optional accounting post split
-	function onclickAccountingPostSplitAddItem(amount, subject_folder, comment) {
+	function onclickAccountingPostSplitAddItem(amount, subject_folder, comment, post) {
 		var randomId = '' + (new Date()).getTime() + parseInt(1000 * Math.random());
 		$('#accounting_post_split_items').append(
 			'<div class="col-12 split-items" id="item_' + randomId + '">' +
@@ -608,7 +608,7 @@ $(function() {
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.12" name="vat_' + randomId + '" class="vat"> 12% VAT</label>' +
 			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0" name="vat_' + randomId + '" class="vat"> 0% VAT</label>' +
 			'<input type="text" placeholder="Subject" name="accounting_subject_' + randomId + '" class="accounting_subject_split_input" style="width: 100px;" value="' + subject_folder + '">' +
-			'<input type="text" placeholder="Post" name="accounting_post_' + randomId + '" class="accounting_post_split_input" style="width: 100px;">' +
+			'<input type="text" placeholder="Post" name="accounting_post_' + randomId + '" class="accounting_post_split_input" style="width: 100px;" value="' + post + '">' +
 			'<input type="text" placeholder="Comment" name="comment_' + randomId + '" class="comment_split_input" style="width: 400px;" value="' + comment + '">' +
 			'<span style="padding-left: 15px;">' +
 			'Eks MVA.: <span style="padding-right: 15px; font-weight: bold;" class="amount_ex_vat"></span>' +
