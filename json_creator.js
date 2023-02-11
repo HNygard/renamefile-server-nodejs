@@ -39,6 +39,7 @@ $(function () {
     var sources;
     var selected_source;
     var accountTransaction;
+    var foldersToSourceKey;
     fetch('sources.json')
         .then(function (data) {
             return data.json();
@@ -55,6 +56,12 @@ $(function () {
                 if (sources[i].card_accounts_key) {
                     sources[i].card_accounts = data[sources[i].card_accounts_key];
                 }
+            }
+            if (data.foldersToSourceKey) {
+                foldersToSourceKey = data.foldersToSourceKey;
+            }
+            else {
+                foldersToSourceKey = [];
             }
             reset();
         });
@@ -209,7 +216,25 @@ $(function () {
 
     function htmlAccountingSubject() {
         var html_accounting_subject = htmlStatus();
+
+        var matchFound = false;
+        var sourceKeysAllowed = [];
+        var keys = Object.keys(foldersToSourceKey);
+        for(var i = 0; i < keys.length; i++) {
+            console.warn(window.folderLocation.substring(0, keys[i].length));
+            if (window.folderLocation.substring(0, keys[i].length) === keys[i]) {
+                console.log('Folder matching source mapping.');
+                sourceKeysAllowed = foldersToSourceKey[keys[i]];
+                matchFound = true;
+            }
+        }
+
         for (var i = 0; i < sources.length; i++) {
+            if (matchFound && !sourceKeysAllowed.includes(sources[i].folder)) {
+                console.log('Filtering out [' + sources[i].folder + '].');
+                continue;
+            }
+
             html_accounting_subject += '<div class="col-12" style="padding-top: 5px; padding-bottom: 5px;">' +
                 '<button data-folder="' + sources[i].folder + '"' +
                 ' class="btn btn-default accounting_subject_selector"' +
