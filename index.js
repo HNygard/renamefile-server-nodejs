@@ -13,12 +13,12 @@ console.log('Starting server in:');
 console.log('    ' + CURRENT_DIRECTORY);
 
 function getLocalFile(filename) {
-	// Hack to find the directory of our scripts.
-        var lib_directory = process.mainModule.filename.substring(0, process.mainModule.filename.length - 'index.js'.length);
-        return path.join(lib_directory, filename);
+    // Hack to find the directory of our scripts.
+    var lib_directory = process.mainModule.filename.substring(0, process.mainModule.filename.length - 'index.js'.length);
+    return path.join(lib_directory, filename);
 }
 
-http.createServer(function(request, response) {
+http.createServer(function (request, response) {
 
     var uri = url.parse(request.url).pathname;
     console.log('# -- # ' + uri + ' # -- #');
@@ -64,9 +64,9 @@ http.createServer(function(request, response) {
         '.pdf': "application/pdf"
     };
 
-    var fileExistsOr404 = function(filenameThatShouldExist, successFunction) {
+    var fileExistsOr404 = function (filenameThatShouldExist, successFunction) {
 
-        fs.exists("" + filenameThatShouldExist, function(exists) {
+        fs.exists("" + filenameThatShouldExist, function (exists) {
             if (!exists) {
                 console.log('-- 404 Not Found: ' + filenameThatShouldExist);
                 response.writeHead(404, {"Content-Type": "text/plain"});
@@ -123,7 +123,7 @@ http.createServer(function(request, response) {
 
         // Based on http://stackoverflow.com/a/12022746/298195
         var queryData = "";
-        request.on('data', function(data) {
+        request.on('data', function (data) {
             queryData += data;
             if (queryData.length > 1e6) {
                 queryData = "";
@@ -132,7 +132,7 @@ http.createServer(function(request, response) {
             }
         });
 
-        request.on('end', function() {
+        request.on('end', function () {
             response.post = querystring.parse(queryData);
             console.log(response.post);
             return endFunction();
@@ -146,7 +146,7 @@ http.createServer(function(request, response) {
         console.log('-- FILEVIEW: ');
         console.log(fileview);
         var filenextqueryPart = '';
-        if(query4.categorize) {
+        if (query4.categorize) {
             filenextqueryPart += '&amp;categorize=true';
         }
 
@@ -156,7 +156,7 @@ http.createServer(function(request, response) {
             '        <meta charset="utf-8"/>' +
             '    </head>' +
             '    <frameset framespacing="0" cols="300,*" frameborder="0" noresize>' +
-            '        <frame name="top" src="/filelist?fileview='+ fileview + filenextqueryPart + '" target="top">' +
+            '        <frame name="top" src="/filelist?fileview=' + fileview + filenextqueryPart + '" target="top">' +
             '        <frame name="main" src="/fileoverview_with_rename" target="main">' +
             '    </frameset>' +
             '</html>';
@@ -164,7 +164,6 @@ http.createServer(function(request, response) {
         response.write(mainpage_html1 + "\n");
         response.end();
     }
-
     else if (uri === '/fileoverview_with_rename') {
         var mainpage_html2 = '<!DOCTYPE html>' +
             '<html>' +
@@ -180,7 +179,6 @@ http.createServer(function(request, response) {
         response.write(mainpage_html2 + "\n");
         response.end();
     }
-
     else if (uri === '/fileoverview') {
         var htmlFileoverview = '<!DOCTYPE html>' +
             '<html>' +
@@ -228,7 +226,6 @@ http.createServer(function(request, response) {
         response.write(htmlFileoverview + "\n");
         response.end();
     }
-
     else if (uri === '/filecategoriser') {
         var url_parts1 = url.parse(request.url, true);
         var query1 = url_parts1.query;
@@ -237,7 +234,7 @@ http.createServer(function(request, response) {
         console.log(files);
 
         if (request.method === 'POST') {
-            handlePost(function() {
+            handlePost(function () {
 
                 var htmlFilecategorizerAfter = '<!DOCTYPE html>' +
                     '<html>' +
@@ -303,23 +300,22 @@ http.createServer(function(request, response) {
             response.end();
         }
     }
-
     else if (uri === '/fileview') {
         var url_parts2 = url.parse(request.url, true);
         var query2 = url_parts2.query;
         console.log('-- FILE: ' + query2.file);
         console.log('-- FILE NEXT: ' + query2.filenext);
         var filenextqueryPart = '';
-        if(query2.filenext) {
+        if (query2.filenext) {
             filenextqueryPart += '&amp;filenext=' + query2.filenext;
         }
-        if(query2.categorize) {
+        if (query2.categorize) {
             filenextqueryPart += '&amp;categorize=true';
         }
 
-        fileExistsOr404(query2.file, function() {
+        fileExistsOr404(query2.file, function () {
             var fileviewimg = '/fileviewimg?file=' + query2.file + filenextqueryPart;
-            if (query2.file.endsWith('.PDF') || query2.file.endsWith('.pdf') ||  query2.file.endsWith('.json') ||  query2.file.endsWith('.txt')) {
+            if (query2.file.endsWith('.PDF') || query2.file.endsWith('.pdf') || query2.file.endsWith('.json') || query2.file.endsWith('.txt')) {
                 // -> A PDF. Lets use Chrome PDF viewer.
                 fileviewimg = query2.file;
             }
@@ -327,7 +323,7 @@ http.createServer(function(request, response) {
                 '<html>' +
                 '    <head>' +
                 '        <meta charset="utf-8"/>' +
-                    '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">' +
+                '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">' +
                 '    </head>' +
                 '    <frameset framespacing="0" rows="*,174" frameborder="0" noresize>' +
                 '        <frame name="viewimg" src="' + fileviewimg + '">' +
@@ -339,13 +335,12 @@ http.createServer(function(request, response) {
             response.end();
         });
     }
-
     else if (uri === '/fileviewimg') {
         var url_parts3 = url.parse(request.url, true);
         var query3 = url_parts3.query;
         console.log('-- FILE: ' + query3.file);
         console.log('-- NEXT FILE: ' + query3.filenext);
-        fileExistsOr404(query3.file, function() {
+        fileExistsOr404(query3.file, function () {
             var htmlFilerename = '<!DOCTYPE html>' +
                 '<html>' +
                 '    <head>' +
@@ -373,7 +368,7 @@ http.createServer(function(request, response) {
                 '        document.getElementById(\'directory_fileviewer\').src = "";' +
                 '        document.getElementById(\'directory_fileviewer\').style.display = "none";' +
                 '    }' +
-		'}' +
+                '}' +
                 '</script>';
             var file_to_view = query3.file;
             if (fs.lstatSync(query3.file).isDirectory()) {
@@ -405,7 +400,7 @@ http.createServer(function(request, response) {
                 '' +
                 '</script>';
             htmlFilerename += '<script>' +
-		'setImageOrPdfOrText("' + file_to_view + '");' +
+                'setImageOrPdfOrText("' + file_to_view + '");' +
                 '</script>';
             htmlFilerename += '</html>';
             response.writeHead(200, {"Content-Type": "text/html"});
@@ -413,19 +408,18 @@ http.createServer(function(request, response) {
             response.end();
         });
     }
-
     else if (uri === '/filerename') {
         var url_parts = url.parse(request.url, true);
         var query = url_parts.query;
         console.log('-- FILE: ' + query.file);
         console.log('-- NEXT FILE: ' + query.filenext);
-        fileExistsOr404(query.file, function() {
+        fileExistsOr404(query.file, function () {
 
             if (request.method === 'POST') {
-                handlePost(function() {
+                handlePost(function () {
                     var filename_new;
                     var directory_name_new;
-                    if(response.post.data_year) {
+                    if (response.post.data_year) {
                         // -> Mobile categorizer
                         // Folders
                         // <accounting subject>/<year>/<year>-<month>-<day> - <post> - <amount> kr - <comment>
@@ -472,54 +466,54 @@ http.createServer(function(request, response) {
                         jsonObj.amount = response.post.data_amount;
                         jsonObj.currency = currency;
                         jsonObj.comment = response.post.data_comment;
-			jsonObj.transactions = [];
+                        jsonObj.transactions = [];
 
                         if (response.post['amount[]']
-				&& response.post['amount[]'] instanceof Array
-				&& response.post['amount[]'].length > 0) {
-			    // -> Amount split in progress. Multiple items
-			    for (var k = 0; k < response.post['amount[]'].length; k++) {
-				        var objTransaction = {
-				            "amount": response.post['amount[]'][k],
-				            "currency": currency,
-				            "amount_includes_vat": (response.post['amount_includes_vat[]'][k] === 'true'),
-				            "vat_rate": response.post['vat_rate[]'][k],
+                            && response.post['amount[]'] instanceof Array
+                            && response.post['amount[]'].length > 0) {
+                            // -> Amount split in progress. Multiple items
+                            for (var k = 0; k < response.post['amount[]'].length; k++) {
+                                var objTransaction = {
+                                    "amount": response.post['amount[]'][k],
+                                    "currency": currency,
+                                    "amount_includes_vat": (response.post['amount_includes_vat[]'][k] === 'true'),
+                                    "vat_rate": response.post['vat_rate[]'][k],
 //					"foreign_service_with_reversed_vat": true,
-				            "comment": response.post['comment[]'][k],
-				            "accounting_subject": response.post['accounting_subject[]'][k],
-				            "accounting_post": response.post['accounting_post[]'][k]
-				        };
-				        jsonObj.transactions.push(objTransaction);
-				}
-			}
-			else if (response.post['amount[]']
-				&& response.post['amount[]'].length > 0) {
-				// -> Amount split in progress. 1 item
-				var objTransaction = {
-				    "amount": response.post['amount[]'],
-				    "currency": currency,
-				    "amount_includes_vat": (response.post['amount_includes_vat[]'] === 'true'),
-				    "vat_rate": response.post['vat_rate[]'],
+                                    "comment": response.post['comment[]'][k],
+                                    "accounting_subject": response.post['accounting_subject[]'][k],
+                                    "accounting_post": response.post['accounting_post[]'][k]
+                                };
+                                jsonObj.transactions.push(objTransaction);
+                            }
+                        }
+                        else if (response.post['amount[]']
+                            && response.post['amount[]'].length > 0) {
+                            // -> Amount split in progress. 1 item
+                            var objTransaction = {
+                                "amount": response.post['amount[]'],
+                                "currency": currency,
+                                "amount_includes_vat": (response.post['amount_includes_vat[]'] === 'true'),
+                                "vat_rate": response.post['vat_rate[]'],
 //					"foreign_service_with_reversed_vat": true,
-				    "comment": response.post['comment[]'],
-				    "accounting_subject": response.post['accounting_subject[]'],
-				    "accounting_post": response.post['accounting_post[]']
-				};
-				jsonObj.transactions.push(objTransaction);
-			}
-			else {
-			    // -> No split. Create a transaction
-		                var objTransaction = {
-		                    "amount": response.post.data_amount,
-		                    "currency": currency,
-		                    "comment": response.post.data_comment,
-		                    "accounting_subject": response.post.data_accounting_subject
-		                };
-		                if (response.post.data_accounting_post) {
-		                    objTransaction.accounting_post = response.post.data_accounting_post;
-		                }
-		                jsonObj.transactions.push(objTransaction);
-			}
+                                "comment": response.post['comment[]'],
+                                "accounting_subject": response.post['accounting_subject[]'],
+                                "accounting_post": response.post['accounting_post[]']
+                            };
+                            jsonObj.transactions.push(objTransaction);
+                        }
+                        else {
+                            // -> No split. Create a transaction
+                            var objTransaction = {
+                                "amount": response.post.data_amount,
+                                "currency": currency,
+                                "comment": response.post.data_comment,
+                                "accounting_subject": response.post.data_accounting_subject
+                            };
+                            if (response.post.data_accounting_post) {
+                                objTransaction.accounting_post = response.post.data_accounting_post;
+                            }
+                            jsonObj.transactions.push(objTransaction);
+                        }
 
                         var json_file = path.join(CURRENT_DIRECTORY, filename_new + '.json');
                         var jsonString = JSON.stringify(jsonObj, null, 4);
@@ -557,11 +551,11 @@ http.createServer(function(request, response) {
                         '      Ok<br>' +
                         '      - Old: ' + filename_old_with_path + '<br>' +
                         '      - New: ' + filename_new_with_path + '<br>';
-                    if(query.filenext) {
+                    if (query.filenext) {
                         html += '    <script>top.location.href="/?fileview=' + query.filenext + (query.categorize ? '&categorize=true' : '') + '"</script>';
                     }
                     html += '    </body>';
-                        '</html>';
+                    '</html>';
                     response.writeHead(200, {"Content-Type": "text/html"});
                     response.write(html + "\n");
                     response.end();
@@ -572,7 +566,7 @@ http.createServer(function(request, response) {
                 var htmlFilerename = '<!DOCTYPE html>' +
                     '<html>' +
                     '    <head>' +
-                '        <meta charset="utf-8"/>' +
+                    '        <meta charset="utf-8"/>' +
                     '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">' +
                     '<script src="jquery.min.js"></script>' +
                     '<script src="json_creator.js"></script>' +
@@ -606,7 +600,7 @@ http.createServer(function(request, response) {
                 htmlFilerename += '<input id="filename_submit" style="width: 10%" value="Rename" type="submit" class="btn btn-large btn-primary"><br>';
                 htmlFilerename += '</form>';
                 htmlFilerename += 'Previous name: <span id="filename_old_display" ' +
-                    'onclick="document.getElementById(\'filename_new\').value=\''+ path.basename(query.file, path.extname(query.file)) + '\';">' + query.file + '</span><br>';
+                    'onclick="document.getElementById(\'filename_new\').value=\'' + path.basename(query.file, path.extname(query.file)) + '\';">' + query.file + '</span><br>';
                 htmlFilerename += 'New name: <span id="filename_new_display"></span>' + path.extname(query.file) + '<br>';
                 htmlFilerename += '</div>';
                 htmlFilerename += '<div id="json_creator"></div>';
@@ -621,18 +615,18 @@ http.createServer(function(request, response) {
                     'updateFunction(); ' +
                     '</script>';
 
-		    if (fs.lstatSync(query.file).isDirectory()) {
-			console.log('Query is directory: ' + query.file);
-		        var dir_to_view = getFileListForDirectory(query.file);
-		        for (var file_num = 0; file_num < dir_to_view.length; file_num++) {
-			console.log('...: ' + dir_to_view[file_num]);
-				if(dir_to_view[file_num].endsWith('extracted_items.json')) {
-                htmlFilerename += '<script>' +
-                    'initJsonCreatorItems("' + dir_to_view[file_num] + '");' +
-                    '</script>';
-				}
-		        }
-		    }
+                if (fs.lstatSync(query.file).isDirectory()) {
+                    console.log('Query is directory: ' + query.file);
+                    var dir_to_view = getFileListForDirectory(query.file);
+                    for (var file_num = 0; file_num < dir_to_view.length; file_num++) {
+                        console.log('...: ' + dir_to_view[file_num]);
+                        if (dir_to_view[file_num].endsWith('extracted_items.json')) {
+                            htmlFilerename += '<script>' +
+                                'initJsonCreatorItems("' + dir_to_view[file_num] + '");' +
+                                '</script>';
+                        }
+                    }
+                }
 
                 htmlFilerename += '</html>';
                 response.writeHead(200, {"Content-Type": "text/html"});
@@ -641,7 +635,6 @@ http.createServer(function(request, response) {
             }
         });
     }
-
     else if (uri === '/filelist') {
 
         var url_parts5 = url.parse(request.url, true);
@@ -664,22 +657,22 @@ http.createServer(function(request, response) {
         for (var l = 0; l < filesAndDirs.length; l++) {
             var filenameForLink = filesAndDirs[l].substring(CURRENT_DIRECTORY.length + 1);
             var autoclick = '';
-            if(fileview2 === filenameForLink) {
+            if (fileview2 === filenameForLink) {
                 autoclick = ' id="autoclick"';
             }
             var filenextQuery = '';
-            if(filesAndDirs[l+1]) {
-                filenextQuery += '&amp;filenext=' + filesAndDirs[l+1].substring(CURRENT_DIRECTORY.length + 1);
+            if (filesAndDirs[l + 1]) {
+                filenextQuery += '&amp;filenext=' + filesAndDirs[l + 1].substring(CURRENT_DIRECTORY.length + 1);
             }
             var target = 'main';
-            if(query5.categorize) {
+            if (query5.categorize) {
                 target = '_top';
                 filenextQuery += '&amp;categorize=true';
             }
             htmlFilelist += '<span style="white-space:nowrap;">' +
-                '- <a href="/fileview?file=' + filenameForLink + filenextQuery + '" target="' + target + '"'+autoclick+' onClick="this.className=\'clicked\'">' + filenameForLink + '</a></span><br />';
+                '- <a href="/fileview?file=' + filenameForLink + filenextQuery + '" target="' + target + '"' + autoclick + ' onClick="this.className=\'clicked\'">' + filenameForLink + '</a></span><br />';
         }
-        if(fileview2) {
+        if (fileview2) {
             htmlFilelist += '<script>document.getElementById("autoclick").click();</script>'
         }
         htmlFilelist += '</body>';
@@ -688,7 +681,6 @@ http.createServer(function(request, response) {
         response.write(htmlFilelist + "\n");
         response.end();
     }
-
     else if (uri.startsWith('/account_transactions_api/')) {
         // -> Proxy the request.
         http.get('http://localhost:13080' + uri, res => {
@@ -698,16 +690,15 @@ http.createServer(function(request, response) {
                 body += data;
             });
             res.on("end", () => {
-                  response.writeHead(200, {'Content-Type': 'application/json'});
-                  response.write(body);
-                  response.end();
+                response.writeHead(200, {'Content-Type': 'application/json'});
+                response.write(body);
+                response.end();
             });
         });
     }
-
     else {
-        fileExistsOr404(filename, function() {
-            fs.readFile(filename, "binary", function(err, file) {
+        fileExistsOr404(filename, function () {
+            fs.readFile(filename, "binary", function (err, file) {
                 if (err) {
                     console.log('-- 500');
                     console.log('-- Message: ' + err);
@@ -726,7 +717,7 @@ http.createServer(function(request, response) {
                 }
                 if (extension.toLowerCase() === '.pdf') {
                     headers['Content-Disposition'] = 'inline; filename="not-for-saving.pdf"';
-                } 
+                }
                 response.writeHead(200, headers);
                 response.write(file, "binary");
                 response.end();
