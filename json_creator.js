@@ -587,26 +587,35 @@ $(function() {
 		// -> Go into split mode
 		updateHtml(htmlAccountPostSplit());
 		if (!itemsInFolder.length) {
-			onclickAccountingPostSplitAddItem(selected_amount, selected_accounting_subject, comment, '');
+			onclickAccountingPostSplitAddItem(selected_amount, selected_accounting_subject, comment, '', '', true);
 		}
 		else {
 			for (var i = 0; i < itemsInFolder.length; i++) {
 				var item = itemsInFolder[i];
-				onclickAccountingPostSplitAddItem(item.amount, item.accountingSubject, item.comment, item.post);
+				onclickAccountingPostSplitAddItem(item.amount, item.accountingSubject, item.comment, item.post, item.vat_rate, item.hasOwnProperty('amount_includes_vat') ? item.amount_includes_vat : true);
 			}
 		}
 	}
 	// 8 - Optional accounting post split
-	function onclickAccountingPostSplitAddItem(amount, subject_folder, comment, post) {
+	function onclickAccountingPostSplitAddItem(amount, subject_folder, comment, post, vat_rate, include_vat_rate) {
 		var randomId = '' + (new Date()).getTime() + parseInt(1000 * Math.random());
 		$('#accounting_post_split_items').append(
 			'<div class="col-12 split-items" id="item_' + randomId + '">' +
 			'<input type="text" class="amount" placeholder="Amount" name="amount_' + randomId + '" data-id="' + randomId + ' style="width: 100px;" value="' + amount + '">' +
-			'<label style="padding-left: 5px; padding-right: 5px;"><input type="checkbox" value="amount_is_including_vat" name="ink_mva_' + randomId + '" checked="checked" class="inc_vat">Ink MVA</label>' +
-			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.25" name="vat_' + randomId + '" class="vat"> 25% VAT</label>' +
-			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.15" name="vat_' + randomId + '" class="vat"> 15% VAT</label>' +
-			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.12" name="vat_' + randomId + '" class="vat"> 12% VAT</label>' +
-			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0" name="vat_' + randomId + '" class="vat"> 0% VAT</label>' +
+			'<label style="padding-left: 5px; padding-right: 5px;"><input type="checkbox" value="amount_is_including_vat" name="ink_mva_' + randomId + '"'
+				+ (include_vat_rate ? ' checked="checked"' : '') + ' class="inc_vat">Ink MVA</label>' +
+			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.25"'
+				+ (vat_rate == 0.25 ? ' checked="checked"': '')
+				+ ' name="vat_' + randomId + '" class="vat"> 25% VAT</label>' +
+			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.15"'
+				+ (vat_rate == 0.15 ? ' checked="checked"': '')
+				+ ' name="vat_' + randomId + '" class="vat"> 15% VAT</label>' +
+			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0.12"'
+				+ (vat_rate == 0.12 ? ' checked="checked"': '')
+				+ ' name="vat_' + randomId + '" class="vat"> 12% VAT</label>' +
+			'<label style="padding-left: 5px; padding-right: 5px;"><input type="radio" value="0"'
+				+ (vat_rate == 0 ? ' checked="checked"': '')
+				+ ' name="vat_' + randomId + '" class="vat"> 0% VAT</label>' +
 			'<input type="text" placeholder="Subject" name="accounting_subject_' + randomId + '" class="accounting_subject_split_input" style="width: 100px;" value="' + subject_folder + '">' +
 			'<input type="text" placeholder="Post" name="accounting_post_' + randomId + '" class="accounting_post_split_input" style="width: 100px;" value="' + post + '">' +
 			'<input type="text" placeholder="Comment" name="comment_' + randomId + '" class="comment_split_input" style="width: 400px;" value="' + comment + '">' +
