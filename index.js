@@ -484,6 +484,7 @@ http.createServer(function(request, response) {
 				            "currency": currency,
 				            "amount_includes_vat": (response.post['amount_includes_vat[]'][k] === 'true'),
 				            "vat_rate": response.post['vat_rate[]'][k],
+//					"foreign_service_with_reversed_vat": true,
 				            "comment": response.post['comment[]'][k],
 				            "accounting_subject": response.post['accounting_subject[]'][k],
 				            "accounting_post": response.post['accounting_post[]'][k]
@@ -499,6 +500,7 @@ http.createServer(function(request, response) {
 				    "currency": currency,
 				    "amount_includes_vat": (response.post['amount_includes_vat[]'] === 'true'),
 				    "vat_rate": response.post['vat_rate[]'],
+//					"foreign_service_with_reversed_vat": true,
 				    "comment": response.post['comment[]'],
 				    "accounting_subject": response.post['accounting_subject[]'],
 				    "accounting_post": response.post['accounting_post[]']
