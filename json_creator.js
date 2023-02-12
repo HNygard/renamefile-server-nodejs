@@ -256,7 +256,7 @@ $(function () {
                 text +
                 '</button>' +
                 '</div>';
-        }
+        };
         html_payment_type += button('Cash', 'CASH');
         html_payment_type += button('Bank transfer', 'BANK_TRANSFER');
         html_payment_type += button('Card', 'CARD');
@@ -296,7 +296,7 @@ $(function () {
                 labels2.join('<br>') +
                 '</button>' +
                 '</div>';
-        }
+        };
         var amount = parseFloat(selected_amount.replace(',', '.'));
         var bankAccounts = Object.keys(accountTransaction);
         for (var i = 0; i < bankAccounts.length; i++) {
