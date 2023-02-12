@@ -28,6 +28,7 @@ $(function () {
     var selected_invoice_month;
     var selected_invoice_day;
     var selected_amount;
+    var selected_currency;
     var selected_payment_type;
     var selected_transaction_id;
     var selected_accounting_subject;
@@ -105,7 +106,7 @@ $(function () {
             status += ' - ' + selected_accounting_post;
         }
         if (selected_amount) {
-            status += ' - ' + selected_amount + ' kr';
+            status += ' - ' + selected_amount + ' ' + selected_currency;
         }
         if (selected_payment_type) {
             status += ' - ' + selected_payment_type;
@@ -289,6 +290,7 @@ $(function () {
             }
             return '<div class="col-12" style="padding-top: 5px; padding-bottom: 5px;">' +
                 '<button data-transaction-id="' + transaction.id + '"' +
+                ' data-amount-kr="' + transaction.amount_debit + '"' +
                 ' class="btn ' + btn_class + ' account-transaction"' +
                 ' style="width: 100%">' +
                 (a.getYear() - 100 + 2000) + '-' + month + '-' + day + ': ' +
@@ -302,7 +304,19 @@ $(function () {
         for (var i = 0; i < bankAccounts.length; i++) {
             for (var j = 0; j < accountTransaction[bankAccounts[i]].transactions.length; j++) {
                 if (accountTransaction[bankAccounts[i]].transactions[j].amount_debit == amount) {
+                    // -> Transaction matches amount (and are within time frame of selected days)
                     html_transactions += button(accountTransaction[bankAccounts[i]].transactions[j], 'btn-primary');
+                }
+                if  (selected_currency !== 'kr') {
+                    // -> Working on a foreign transaction
+                    for (var k = 0; k < accountTransaction[bankAccounts[i]].transactions[j].labels.length; k++) {
+                        var label = accountTransaction[bankAccounts[i]].transactions[j].labels[k];
+                        if (label.label_type === 'card transaction foreign amount'
+                            // 10,12 USD
+                            && label.label.replace('-', '').replace(',', '.') === amount + ' ' + selected_currency) {
+                            html_transactions += button(accountTransaction[bankAccounts[i]].transactions[j], 'btn-primary');
+                        }
+                    }
                 }
             }
         }
@@ -505,12 +519,13 @@ $(function () {
             comment = comment.substr('2017-01-01 - '.length);
         }
 
-        var regex_amount = /^([0-9\.,]*) kr (INN )?- /g;
+        var regex_amount = /^([0-9\.,]*) (kr|USD|EUR|SEK) (INN )?- /g;
         var match = regex_amount.exec(comment);
         if (match) {
             // -> Starts with "123,12 kr - "
             selected_amount = match[1];
-            console.log('- Found amount: ' + selected_amount);
+            selected_currency = match[2];
+            console.log('- Found amount: ' + selected_amount + ' ' + selected_currency);
             comment = comment.substr(match[0].length);
         }
 
@@ -638,6 +653,13 @@ $(function () {
 
     function onclickSelectTransaction() {
         selected_transaction_id = $(this).data('transaction-id');
+        if (selected_currency !== 'kr') {
+            // -> Used amount in foreign currency (e.g. 10 USD) to match transaction.
+            // Change to NOK.
+            comment = selected_amount + ' ' + selected_currency + ' - ' + comment;
+            selected_amount = $(this).data('amount-kr');
+            selected_currency = 'kr';
+        }
         updateHtml(htmlAccountingPost());
     }
 
