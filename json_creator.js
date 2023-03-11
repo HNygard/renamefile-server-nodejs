@@ -313,7 +313,15 @@ $(function () {
                         var label = accountTransaction[bankAccounts[i]].transactions[j].labels[k];
                         if (label.label_type === 'card transaction foreign amount'
                             // 10,12 USD
-                            && label.label.replace('-', '').replace(',', '.') === amount + ' ' + selected_currency) {
+                            && label.label
+                                .replace('-', '')
+                                .replace(',', '.')
+                                .replace('.00', '')
+                                === amount + ' ' + (
+                                    selected_currency
+                                        .replace('.00', '')
+                            )
+                        ) {
                             html_transactions += button(accountTransaction[bankAccounts[i]].transactions[j], 'btn-primary');
                         }
                     }
