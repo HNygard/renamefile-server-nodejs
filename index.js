@@ -605,6 +605,7 @@ http.createServer(function (request, response) {
                 htmlFilerename += '</div>';
                 htmlFilerename += '<div id="json_creator"></div>';
                 htmlFilerename += '</body>';
+                htmlFilerename += '<script>window.folderLocation="' + CURRENT_DIRECTORY + '";</script>';
                 htmlFilerename += '<script>' +
                     'var elm = document.getElementById("filename_new"); ' +
                     'var elm2 = document.getElementById("filename_new_display"); ' +
