@@ -317,10 +317,11 @@ $(function () {
                                 .replace('-', '')
                                 .replace(',', '.')
                                 .replace('.00', '')
+                                .replace('0 ', ' ')
                                 === amount + ' ' + (
                                     selected_currency
                                         .replace('.00', '')
-                            )
+                            ).replace('0 ', ' ')
                         ) {
                             html_transactions += button(accountTransaction[bankAccounts[i]].transactions[j], 'btn-primary');
                         }
