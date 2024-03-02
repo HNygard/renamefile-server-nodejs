@@ -1,4 +1,6 @@
 var itemsInFolder = [];
+var extractedDate = '';
+var extractedAmount = '';
 
 function initJsonCreatorItems(filename) {
     console.log("Init items from: " + filename);
@@ -8,8 +10,10 @@ function initJsonCreatorItems(filename) {
             return data.json();
         })
         .then(function (data) {
+            extractedAmount = data.amount;
+            extractedDate = data.date;
             itemsInFolder = data.items;
-            console.log("Init items read: " + itemsInFolder.length, itemsInFolder);
+            console.log("Init items read: " + itemsInFolder.length + ". Date: " + extractedDate, itemsInFolder);
         });
 }
 
@@ -536,6 +540,21 @@ $(function () {
             selected_currency = match[2];
             console.log('- Found amount: ' + selected_amount + ' ' + selected_currency);
             comment = comment.substr(match[0].length);
+        }
+
+        if (extractedAmount) {
+            selected_amount = '' + extractedAmount;
+            selected_currency = 'kr';
+            console.log('- Extracted amount: ' + selected_amount)
+        }
+
+        if (extractedDate) {
+            var regex_date2 = /^([0-9][0-9][0-9][0-9])-([0-9][0-9])-([0-9][0-9])/g;
+            var match = regex_date2.exec(extractedDate);
+            selected_year = match[1];
+            selected_month = match[2];
+            selected_day = match[3];
+            console.log('- Extracted date: ' + selected_year + '-' + selected_month + '-' + selected_day);
         }
 
         if (selected_year && selected_month && selected_day) {
