@@ -685,7 +685,7 @@ $(function () {
             // -> Used amount in foreign currency (e.g. 10 USD) to match transaction.
             // Change to NOK.
             comment = selected_amount + ' ' + selected_currency + ' - ' + comment;
-            selected_amount = $(this).data('amount-kr');
+            selected_amount = '' + $(this).data('amount-kr');
             selected_currency = 'kr';
         }
         updateHtml(htmlAccountingPost());
