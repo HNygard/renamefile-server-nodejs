@@ -1,9 +1,12 @@
-var http = require("http"),
-    url = require("url"),
-    path = require("path"),
-    fs = require("fs"),
-    querystring = require('querystring'),
-    open = require('open');
+import http from 'http';
+import url from 'url';
+import path from 'path';
+import fs from 'fs';
+import querystring from 'querystring';
+import open from 'open';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+
 
 var port = process.argv[2] || 8888;
 var serverUrl = 'http://localhost:' + port;
@@ -12,10 +15,12 @@ var CURRENT_DIRECTORY = process.cwd();
 console.log('Starting server in:');
 console.log('    ' + CURRENT_DIRECTORY);
 
+// Get the directory of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 function getLocalFile(filename) {
-    // Hack to find the directory of our scripts.
-    var lib_directory = process.mainModule.filename.substring(0, process.mainModule.filename.length - 'index.js'.length);
-    return path.join(lib_directory, filename);
+    return join(__dirname, filename);
 }
 
 http.createServer(function (request, response) {
