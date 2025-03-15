@@ -315,6 +315,19 @@ $(function () {
                     // -> Working on a foreign transaction
                     for (var k = 0; k < accountTransaction[bankAccounts[i]].transactions[j].labels.length; k++) {
                         var label = accountTransaction[bankAccounts[i]].transactions[j].labels[k];
+                        /*if (label.label_type === 'card transaction foreign amount')
+                        console.log(label.label
+                            .replace('-', '')
+                            .replace(',', '.')
+                            .replace('.00', '')
+                            .replace('0 ', ' ')
+                        , amount + ' ' + (
+                            selected_currency
+                                .replace('.00', '')
+                        ).replace('0 ', ' ')
+                        );
+                        */
+
                         if (label.label_type === 'card transaction foreign amount'
                             // 10,12 USD
                             && label.label
