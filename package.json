@@ -10,7 +10,7 @@
     "connect": "3.7.0",
     "open": "10.1.0",
     "jquery": "3.7.1",
-    "bootstrap": "4.0.0",
+    "bootstrap": "5.3.3",
     "hammerjs": "2.0.8",
     "bootstrap-3-typeahead": "4.0.2"
   }

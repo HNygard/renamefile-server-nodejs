@@ -140,7 +140,7 @@ $(function () {
         for (var i = current_year; i > (current_year - 6); i--) {
             html_years += '<div class="col-6" style="padding-top: 5px; padding-bottom: 5px;">' +
                 '<button value="' + (i) + '"' +
-                ' class="btn ' + (current_year === i ? 'btn-primary' : 'btn-default') + ' ' + selector + '"' +
+                ' class="btn ' + (current_year === i ? 'btn-primary' : 'btn-secondary') + ' ' + selector + '"' +
                 ' style="width: 100%">' +
                 (i) +
                 '</button>' +
@@ -154,7 +154,7 @@ $(function () {
         for (var i = 1; i <= 12; i++) {
             html_months += '<div class="col-3" style="padding-top: 5px; padding-bottom: 5px;">' +
                 '<button value="' + (i) + '"' +
-                ' class="btn btn-default ' + selector + '"' +
+                ' class="btn btn-secondary ' + selector + '"' +
                 ' style="width: 100%">' +
                 (i) +
                 '</button>' +
@@ -169,7 +169,7 @@ $(function () {
             return '<div style="padding-top: 5px; padding-bottom: 5px; flex: 0 0 9.090909091%;' +
                 ' max-width: 9.090909091%; position: relative; width: 100%; padding-left: 1px; padding-right: 1px;">' +
                 '<button value="' + (i) + '"' +
-                ' class="btn btn-default ' + selector + '"' +
+                ' class="btn btn-secondary ' + selector + '"' +
                 ' style="width: 100%;">' +
                 '<span style="margin-left: -10px;">' + (i) + '</span>' +
                 '</button>' +
@@ -196,7 +196,7 @@ $(function () {
         var button = function (i, className) {
             return '<div class="col-3" style="padding-top: 5px; padding-bottom: 5px;">' +
                 '<button value="' + (i) + '"' +
-                ' class="btn ' + (className ? className : 'btn-default amount_selector') + '"' +
+                ' class="btn ' + (className ? className : 'btn-secondary amount_selector') + '"' +
                 ' style="width: 100%">' +
                 (i) +
                 '</button>' +
@@ -242,7 +242,7 @@ $(function () {
 
             html_accounting_subject += '<div class="col-12" style="padding-top: 5px; padding-bottom: 5px;">' +
                 '<button data-folder="' + sources[i].folder + '"' +
-                ' class="btn btn-default accounting_subject_selector"' +
+                ' class="btn btn-secondary accounting_subject_selector"' +
                 ' style="width: 100%">' +
                 (sources[i].name) +
                 '</button>' +
@@ -256,7 +256,7 @@ $(function () {
         var button = function (text, data_post) {
             return '<div class="col-12" style="padding-top: 5px; padding-bottom: 5px;">' +
                 '<button data-payment-type="' + data_post + '"' +
-                ' class="btn btn-default payment_type"' +
+                ' class="btn btn-secondary payment_type"' +
                 ' style="width: 100%">' +
                 text +
                 '</button>' +
@@ -349,7 +349,7 @@ $(function () {
         var bankAccounts = Object.keys(accountTransaction);
         for (var i = 0; i < bankAccounts.length; i++) {
             for (var j = 0; j < accountTransaction[bankAccounts[i]].transactions.length; j++) {
-                html_transactions += button(accountTransaction[bankAccounts[i]].transactions[j], 'btn-default');
+                html_transactions += button(accountTransaction[bankAccounts[i]].transactions[j], 'btn-secondary');
             }
         }
         return '<div class="container-fluid"><div class="row">' + html_transactions + '</div></div>';
@@ -373,7 +373,7 @@ $(function () {
             html_accounting_post += button(
                 selected_source.accounting_posts[j].account_number + ' - ' + (selected_source.accounting_posts[j].name),
                 selected_source.accounting_posts[j].account_number,
-                'btn btn-default accounting_post'
+                'btn btn-secondary accounting_post'
             );
         }
         return '<div class="container-fluid"><div class="row">' + html_accounting_post + '</div></div>';
@@ -407,7 +407,7 @@ $(function () {
             '</div>';
         html_comment += '<div class="col-12" style="padding-top: 5px; padding-bottom: 5px;">' +
             '<button ' +
-            ' class="btn btn-default comment-next"' +
+            ' class="btn btn-secondary comment-next"' +
             ' style="width: 100%">Save data</button>' +
             '</div>';
         return '<div class="container-fluid"><div class="row">' + html_comment + '</div></div>';
